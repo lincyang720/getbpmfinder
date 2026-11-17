@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>BPM Finder — Detect Tempo &amp; Song Key Online, Free &amp; Private</title>
+  <meta name="description" content="Free BPM finder: detect tempo and song key from any audio file, or tap the beat yourself. Runs entirely in your browser — files never leave your device. No upload, no signup.">
+  <link rel="canonical" href="https://getbpmfinder.com/">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%2314161a'/%3E%3Ctext x='16' y='21' font-family='monospace' font-size='14' font-weight='bold' fill='%23ff5c2b' text-anchor='middle'%3E128%3C/text%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <!-- Non-blocking font load: a pending stylesheet would otherwise block script execution -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+  <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet"></noscript>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <span>BPM Finder</span>
+</header>
+
+<main>
+  <h1>BPM Finder</h1>
+
+  <div class="trust-badges" aria-label="Key promises">
+    <span>No app needed</span>
+    <span>Works instantly</span>
+    <span>Nothing uploaded</span>
+  </div>
+
+  <!-- ============ Dual-mode tool area ============ -->
+  <div class="tool-grid">
+
+    <!-- Mode 1: upload & analyze -->
+    <section class="mode-card" aria-label="Upload audio to analyze BPM and key">
+      <h2 class="mode-title">Upload audio analysis</h2>
+
+      <!-- Cover / Upload -->
+      <div id="toolCover">
+        <div class="drop-zone" id="dropZone" role="button" tabindex="0" aria-label="Drop audio file here or click to select">
+          <input type="file" accept="audio/*" id="fileInput" aria-label="Select audio file">
+          <span class="drop-icon" aria-hidden="true">⬇</span>
+          <span class="drop-label">Drag &amp; drop or <strong>click to select</strong></span>
+        </div>
+        <p class="format-hint">MP3, WAV, OGG, M4A · Max 30 MB / 12 min · file stays on your device</p>
+      </div>
+
+      <!-- Progress -->
+      <div id="toolProgress" class="hidden">
+        <div class="progress-bar-wrap" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" id="progressWrap">
+          <div class="progress-bar-fill" id="progressFill"></div>
+        </div>
+        <span class="progress-stage" id="progressStage">Decoding audio…</span>
+      </div>
+
+      <!-- Error -->
+      <div id="toolError" class="hidden">
+        <p class="error-msg" id="errorMsg"></p>
+        <button class="btn btn-accent" id="retryBtn" type="button">Try again</button>
+      </div>
+    </section>
+
+    <!-- Mode 2: tap tempo -->
+    <section class="mode-card" aria-label="Tap tempo to find BPM">
+      <h2 class="mode-title">Tap tempo</h2>
+      <button class="tap-btn tap-btn-big" id="tapBtn" type="button" aria-label="Tap tempo: tap 4 or more times to get BPM">TAP<br><span class="tap-btn-sub">tap here / press space</span></button>
+      <p class="tap-hint" id="tapHint">Tap 4+ times in rhythm — result appears below</p>
+      <div class="tap-controls">
+        <button class="btn" id="tapResetBtn" type="button">Reset taps</button>
+      </div>
+    </section>
+  </div>
+
+  <!-- ============ Shared result panel ============ -->
+  <section id="toolResults" class="tool-results-panel hidden" aria-label="Detection results" aria-live="polite">
+    <div class="bpm-readout">
+      <span class="bpm-tick-top" aria-hidden="true"></span>
+      <div class="bpm-number" id="bpmNumber">—</div>
+      <span class="bpm-tick-bottom" aria-hidden="true"></span>
+      <span class="bpm-unit">BPM</span>
+    </div>
+
+    <div class="result-details" id="resultDetails">
+      <div class="result-item">
+        <span class="result-label">Key</span>
+        <span class="result-value" id="keyValue">—</span>
+      </div>
+      <div class="result-item">
+        <span class="result-label">Camelot</span>
+        <span class="result-value camelot" id="camelotValue">—</span>
+      </div>
+      <div class="result-item" id="durationItem">
+        <span class="result-label">Duration</span>
+        <span class="result-value" id="durationValue">—</span>
+      </div>
+      <div class="result-item">
+        <span class="result-label">Confidence</span>
+        <span class="result-value" id="confidenceValue">—</span>
+      </div>
+    </div>
+
+    <div class="result-actions" id="resultActions">
+      <!-- Half / Double speed buttons injected by JS -->
+    </div>
+
+    <div class="result-actions">
+      <button class="btn" id="reuploadBtn" type="button">Analyze another file</button>
+    </div>
+  </section>
+
+  <!-- ============ H2: upload mode content ============ -->
+  <section class="info-section">
+    <h2>BPM Finder — analyze an audio file</h2>
+    <p>This BPM finder reads the tempo and musical key of any song you give it. Drop in an MP3, WAV, OGG, or M4A file and it decodes the audio right in your browser, builds an energy envelope from the waveform, and finds the beat by autocorrelation — the same approach used by dedicated tempo-analysis software, running locally instead of on a server. Alongside the tempo it produces a chroma profile of the track and matches it against established key profiles, so you also get the song key and its Camelot wheel position.</p>
+    <p>Two things matter about how this works. First, your audio never leaves your device: the file is decoded by your own browser's Web Audio API and analyzed in a local Web Worker. Nothing is uploaded, nothing is stored, there is no account to create. Second, you are not limited to one number — real music often has tempo ambiguity, so when the detector finds a plausible reading at half or double the shown BPM, it offers those alternatives as one-click buttons, and you can always override the result by tapping the beat yourself in the panel above.</p>
+    <p>The analysis takes one to three seconds for a typical three-minute track. Larger files are downsampled first so the math stays fast, and a progress indicator shows each stage — decode, downsample, tempo, key — so you always know it is working.</p>
+  </section>
+
+  <!-- ============ H2: tap mode content ============ -->
+  <section class="info-section">
+    <h2>Tap Tempo — find BPM by tapping</h2>
+    <p>No file? You can measure tempo with nothing but your keyboard. Play the track, tap the big TAP button (or press the spacebar) in time with the beat, and after four taps the average interval converts to a BPM reading that keeps refining as you keep tapping. This is the same tap-tempo feature built into DJ software and hardware samplers, and it is the most reliable way to confirm a machine-detected tempo.</p>
+    <p>Tap tempo is also the fix when automatic detection is unsure. Tracks without drums — classical recordings, ambient pads, solo piano, spoken word — give the algorithm little to lock onto, and it will say so with a low confidence marker. Your own tapping has no such problem: you hear the beat, you tap the beat. Hit "Reset taps" to start a new measurement, and use it to compare two readings before trusting either.</p>
+  </section>
+
+  <!-- ============ H2: BPM ranges ============ -->
+  <section class="info-section">
+    <h2>What your BPM means — genre reference</h2>
+    <p>Tempo is a strong hint about what kind of track you are holding. Electronic and dance genres cluster around hard conventions because DJs beatmatch; live genres spread wider. When a result appears above, the matching row in this table lights up.</p>
+    <table class="bpm-table" id="bpmTable">
+      <thead><tr><th scope="col">BPM range</th><th scope="col">Typical genres</th></tr></thead>
+      <tbody>
+        <tr data-min="0" data-max="69"><td>60–69</td><td>Ballads, downtempo, ambient, sleep music</td></tr>
+        <tr data-min="70" data-max="89"><td>70–89</td><td>Hip-hop, boom bap, lo-fi hip-hop, reggae, dub</td></tr>
+        <tr data-min="90" data-max="109"><td>90–109</td><td>Pop, R&amp;B, soul, funk, old-school hip-hop</td></tr>
+        <tr data-min="110" data-max="119"><td>110–119</td><td>Deep house, disco, afrobeats</td></tr>
+        <tr data-min="120" data-max="127"><td>120–127</td><td>House, tech house, techno, electro</td></tr>
+        <tr data-min="128" data-max="139"><td>128–139</td><td>Trance, progressive house, big room, dubstep (half-time)</td></tr>
+        <tr data-min="140" data-max="159"><td>140–159</td><td>Trap (double-time feel), hardstyle, UK garage</td></tr>
+        <tr data-min="160" data-max="180"><td>160–180</td><td>Drum &amp; bass, jungle, hardcore</td></tr>
+        <tr data-min="181" data-max="220"><td>180–220</td><td>Juke, footwork, extreme metal blast beats</td></tr>
+      </tbody>
+    </table>
+    <p>If your result lands between genres, remember the half-speed / double-speed rule: a 140 BPM reading might really be a 70 BPM hip-hop track, and the one that matches the drums you actually hear is the right one. Electronic music is produced to these ranges on purpose — if a "house" track shows up at 96 BPM, it is probably halftime or the detector picked the wrong multiple.</p>
+  </section>
+
+  <!-- ============ H2: reading results ============ -->
+  <section class="info-section">
+    <h2>How to read the results</h2>
+    <p><strong>BPM</strong> (beats per minute) is how many evenly spaced beats the track contains in one minute. A reading of 120 means 120 beats every 60 seconds, one beat every half second — count along with a clock and you can verify it by ear in ten seconds.</p>
+    <p><strong>Half-speed / double-speed buttons</strong> exist because tempo has an octave ambiguity. A slow 70 BPM groove and its 140 BPM double-time reading are both internally consistent; snare placement usually decides which one people mean. The detector prefers the 70–180 range where most music lives, and shows the alternative so you can decide with your ears, not the algorithm.</p>
+    <p><strong>Key and Camelot number</strong>: the key is the tonal center the track resolves to, major or minor. The Camelot number is a DJ-friendly code where each key gets a number from 1 to 12 plus A (minor) or B (major). Tracks with the same Camelot code mix cleanly, neighbors (8B→7B, 8B→9B) mix smoothly, and switching the letter on the same number (8A→8B) gives a brightening or darkening shift. That is the whole wheel system — no music theory required to use it.</p>
+  </section>
+
+  <!-- ============ FAQ ============ -->
+  <section class="info-section faq-section">
+    <h2>Common questions</h2>
+
+    <details>
+      <summary>Does this work on mobile?</summary>
+      <div class="faq-answer">Yes. Both the file analysis and tap tempo run in your mobile browser. Analysis performance depends on your device — a three-minute song typically takes a few seconds on a recent phone. Tap tempo works even better on mobile since you can tap along anywhere.</div>
+    </details>
+
+    <details>
+      <summary>Do I need to sign up?</summary>
+      <div class="faq-answer">No. There is no account, no login, no email. Open the page and use it.</div>
+    </details>
+
+    <details>
+      <summary>Is my audio file uploaded to a server?</summary>
+      <div class="faq-answer">No. The file is decoded and analyzed entirely inside your browser using the Web Audio API and a local Web Worker. No audio data leaves your device, and nothing is stored after you close the page.</div>
+    </details>
+
+    <details>
+      <summary>Which audio formats are supported?</summary>
+      <div class="faq-answer">Whatever your browser can decode: MP3, WAV, OGG, and M4A/AAC all work in Chrome and Edge; Safari adds support for more Apple formats. If a file fails to decode, convert it to MP3 or WAV and try again. The limit is 30 MB and 12 minutes per file.</div>
+    </details>
+
+    <details>
+      <summary>Why might the BPM be off by a factor of two?</summary>
+      <div class="faq-answer">Rhythm has an octave ambiguity: the same track can be counted at 80 or 160 BPM depending on which pulses you follow. The detector prefers the 70–180 BPM range and offers the half/double alternative as a one-click button when it exists. Your ears make the final call.</div>
+    </details>
+
+    <details>
+      <summary>What if the detection is inaccurate?</summary>
+      <div class="faq-answer">Check the confidence marker. Low confidence usually means the track has no clear beat (ambient, classical, field recordings). Two fixes: use tap tempo to measure the beat yourself, or try a section of the song with drums — most detections use the whole file, so a drum-heavy excerpt works well.</div>
+    </details>
+
+    <details>
+      <summary>Can I analyze multiple files at once?</summary>
+      <div class="faq-answer">Not in this version — one file at a time. Click "Analyze another file" to start the next one.</div>
+    </details>
+
+    <details>
+      <summary>Is this free?</summary>
+      <div class="faq-answer">Yes, completely. No limits, no account, no ads.</div>
+    </details>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-col">
+      <h3>About</h3>
+      <ul>
+        <li><a href="#">About</a></li>
+        <li><a href="#">Contact</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h3>Legal</h3>
+      <ul>
+        <li><a href="#">Privacy</a></li>
+        <li><a href="#">Terms</a></li>
+        <li><a href="#">Copyright complaints</a></li>
+      </ul>
+    </div>
+  </div>
+  <p class="footer-copy">&copy; 2026 BPM Finder. All processing runs in your browser — audio files never leave your device.</p>
+</footer>
+
+<script>
+/* ====================================================
+   BPM Finder — main script
+   Web Worker is inlined as a Blob URL
+   ==================================================== */
+
+// ---- Worker source (string) ----
+const WORKER_SRC = `
+"use strict";
+
+// ---- FFT (radix-2, in-place Cooley-Tukey) ----
+function fft(re, im) {
+  const n = re.length;
+  if (n <= 1) return;
+  // bit-reversal permutation
+  for (let i = 1, j = 0; i < n; i++) {
+    let bit = n >> 1;
+    for (; j & bit; bit >>= 1) j ^= bit;
+    j ^= bit;
+    if (i < j) {
+      let t = re[i]; re[i] = re[j]; re[j] = t;
+      t = im[i]; im[i] = im[j]; im[j] = t;
+    }
+  }
+  for (let len = 2; len <= n; len <<= 1) {
+    const ang = -2 * Math.PI / len;
+    const wRe = Math.cos(ang), wIm = Math.sin(ang);
+    for (let i = 0; i < n; i += len) {
+      let cRe = 1, cIm = 0;
+      for (let j = 0; j < (len >> 1); j++) {
+        const uRe = re[i + j], uIm = im[i + j];
+        const k = i + j + (len >> 1);
+        const vRe = re[k] * cRe - im[k] * cIm;
+        const vIm = re[k] * cIm + im[k] * cRe;
+        re[i + j] = uRe + vRe;
+        im[i + j] = uIm + vIm;
+        re[k] = uRe - vRe;
+        im[k] = uIm - vIm;
+        const nRe = cRe * wRe - cIm * wIm;
+        cIm = cRe * wIm + cIm * wRe;
+        cRe = nRe;
+      }
+    }
+  }
+}
+
+// ---- RMS energy envelope ----
+function rmsEnvelope(samples, frameSize, hop) {
+  const env = [];
+  for (let i = 0; i + frameSize <= samples.length; i += hop) {
+    let sum = 0;
+    for (let j = 0; j < frameSize; j++) {
+      const s = samples[i + j];
+      sum += s * s;
+    }
+    env.push(Math.sqrt(sum / frameSize));
+  }
+  return env;
+}
+
+// ---- Onset strength (half-wave rectified diff) ----
+function onsetStrength(env) {
+  const onsets = [0];
+  for (let i = 1; i < env.length; i++) {
+    const diff = env[i] - env[i - 1];
+    onsets.push(diff > 0 ? diff : 0);
+  }
+  return onsets;
+}
+
+// ---- Autocorrelation ----
+function autocorrelate(signal, minLag, maxLag) {
+  const n = signal.length;
+  const result = new Float64Array(maxLag + 1);
+  for (let lag = minLag; lag <= maxLag; lag++) {
+    let sum = 0;
+    const len = n - lag;
+    for (let i = 0; i < len; i++) {
+      sum += signal[i] * signal[i + lag];
+    }
+    result[lag] = sum / len;
+  }
+  return result;
+}
+
+// ---- Find peaks in autocorrelation ----
+function findPeaks(acf, minLag, maxLag) {
+  const peaks = [];
+  for (let i = minLag + 1; i < maxLag - 1; i++) {
+    if (acf[i] > acf[i - 1] && acf[i] > acf[i + 1] && acf[i] > 0) {
+      peaks.push({ lag: i, value: acf[i] });
+    }
+  }
+  peaks.sort((a, b) => b.value - a.value);
+  return peaks;
+}
+
+// ---- BPM detection ----
+function detectBPM(samples, sampleRate) {
+  const FRAME = 1024, HOP = 256;
+  const env = rmsEnvelope(samples, FRAME, HOP);
+  const onsets = onsetStrength(env);
+  const effectiveRate = sampleRate / HOP; // frames per second
+
+  // Lag range for 50–220 BPM
+  const minLag = Math.floor(effectiveRate * 60 / 220);
+  const maxLag = Math.ceil(effectiveRate * 60 / 50);
+  const safeMax = Math.min(maxLag, onsets.length - 1);
+
+  const acf = autocorrelate(onsets, minLag, safeMax);
+  const peaks = findPeaks(acf, minLag, safeMax);
+
+  if (peaks.length === 0) {
+    return { bpm: 0, confidence: 'low', alternatives: [] };
+  }
+
+  // Parabolic interpolation for sub-lag precision
+  function refineLag(lag) {
+    if (lag <= minLag || lag >= safeMax) return lag;
+    const y0 = acf[lag], ym = acf[lag - 1], yp = acf[lag + 1];
+    const denom = ym - 2 * y0 + yp;
+    if (Math.abs(denom) < 1e-12) return lag;
+    const offset = 0.5 * (ym - yp) / denom;
+    if (offset < -0.5 || offset > 0.5) return lag;
+    return lag + offset;
+  }
+
+  // Convert lag to BPM
+  const primary = effectiveRate * 60 / refineLag(peaks[0].lag);
+
+  // Octave ambiguity: prefer 70–180
+  let bpm = primary;
+  let alternatives = [];
+  if (bpm < 70 && bpm * 2 <= 220) {
+    alternatives.push(Math.round(bpm));
+    bpm = bpm * 2;
+  } else if (bpm > 180 && bpm / 2 >= 50) {
+    alternatives.push(Math.round(bpm));
+    bpm = bpm / 2;
+  }
+  bpm = Math.round(bpm);
+
+  // Offer the other tempo
+  const half = Math.round(bpm / 2);
+  const dbl = Math.round(bpm * 2);
+  if (half >= 50 && half <= 220) alternatives.push(half);
+  if (dbl >= 50 && dbl <= 220) alternatives.push(dbl);
+  // deduplicate
+  alternatives = [...new Set(alternatives)].filter(a => a !== bpm);
+
+  // Confidence: primary peak vs strongest NON-harmonic peak.
+  // Peaks at half/double the chosen tempo are octave ambiguities, not competing
+  // rhythms, so they must not lower confidence.
+  const effLag = effectiveRate * 60 / bpm;
+  const isHarmonic = (lag) => {
+    for (const mult of [0.5, 1, 2]) {
+      if (Math.abs(lag - effLag * mult) < Math.max(2, effLag * mult * 0.1)) return true;
+    }
+    return false;
+  };
+  let bestNonHarmonic = 0;
+  for (const p of peaks) {
+    if (!isHarmonic(p.lag) && p.value > bestNonHarmonic) bestNonHarmonic = p.value;
+  }
+  const confRatio = bestNonHarmonic > 0 ? peaks[0].value / bestNonHarmonic : 3;
+  let confidence;
+  if (confRatio >= 1.8) confidence = 'high';
+  else if (confRatio >= 1.25) confidence = 'medium';
+  else confidence = 'low';
+
+  return { bpm, confidence, alternatives };
+}
+
+// ---- Chroma vector from FFT frames ----
+function computeChroma(samples, sampleRate) {
+  const FFT_SIZE = 4096, HOP = 2048;
+  const chroma = new Float64Array(12);
+  let frameCount = 0;
+
+  for (let offset = 0; offset + FFT_SIZE <= samples.length; offset += HOP) {
+    const re = new Float64Array(FFT_SIZE);
+    const im = new Float64Array(FFT_SIZE);
+    // Hanning window
+    for (let i = 0; i < FFT_SIZE; i++) {
+      re[i] = samples[offset + i] * (0.5 - 0.5 * Math.cos(2 * Math.PI * i / (FFT_SIZE - 1)));
+    }
+    fft(re, im);
+
+    // Map bins to pitch classes
+    for (let k = 1; k < FFT_SIZE / 2; k++) {
+      const freq = k * sampleRate / FFT_SIZE;
+      if (freq < 60 || freq > 5000) continue;
+      // MIDI note number
+      const midi = 12 * Math.log2(freq / 440) + 69;
+      const pc = Math.round(midi) % 12;
+      const pcIdx = ((pc % 12) + 12) % 12;
+      const mag = Math.sqrt(re[k] * re[k] + im[k] * im[k]);
+      chroma[pcIdx] += mag;
+    }
+    frameCount++;
+  }
+
+  if (frameCount > 0) {
+    for (let i = 0; i < 12; i++) chroma[i] /= frameCount;
+  }
+  // Normalize
+  let max = 0;
+  for (let i = 0; i < 12; i++) if (chroma[i] > max) max = chroma[i];
+  if (max > 0) for (let i = 0; i < 12; i++) chroma[i] /= max;
+
+  return chroma;
+}
+
+// ---- Krumhansl-Schmuckler key profiles ----
+const KS_MAJOR = [6.35, 2.23, 3.48, 2.33, 4.38, 4.09, 2.52, 5.19, 2.39, 3.66, 2.29, 2.88];
+const KS_MINOR = [6.33, 2.68, 3.52, 5.38, 2.60, 3.53, 2.54, 4.75, 3.98, 2.69, 3.34, 3.17];
+
+// Rotate array
+function rotate(arr, n) {
+  const len = arr.length;
+  const r = new Float64Array(len);
+  for (let i = 0; i < len; i++) r[i] = arr[((i - n) % len + len) % len];
+  return r;
+}
+
+// Pearson correlation
+function pearson(a, b) {
+  const n = a.length;
+  let sa = 0, sb = 0, sa2 = 0, sb2 = 0, sab = 0;
+  for (let i = 0; i < n; i++) {
+    sa += a[i]; sb += b[i];
+    sa2 += a[i] * a[i]; sb2 += b[i] * b[i];
+    sab += a[i] * b[i];
+  }
+  const num = n * sab - sa * sb;
+  const den = Math.sqrt((n * sa2 - sa * sa) * (n * sb2 - sb * sb));
+  return den === 0 ? 0 : num / den;
+}
+
+// Note names: C=0, C#=1, ... B=11
+const NOTE_NAMES = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+
+function detectKey(samples, sampleRate) {
+  const chroma = computeChroma(samples, sampleRate);
+  let bestScore = -Infinity, bestKey = 0, bestMode = 'major';
+
+  for (let shift = 0; shift < 12; shift++) {
+    const majorProfile = rotate(KS_MAJOR, shift);
+    const minorProfile = rotate(KS_MINOR, shift);
+    const majorCorr = pearson(chroma, majorProfile);
+    const minorCorr = pearson(chroma, minorProfile);
+    if (majorCorr > bestScore) { bestScore = majorCorr; bestKey = shift; bestMode = 'major'; }
+    if (minorCorr > bestScore) { bestScore = minorCorr; bestKey = shift; bestMode = 'minor'; }
+  }
+
+  return {
+    name: NOTE_NAMES[bestKey] + (bestMode === 'minor' ? 'm' : ''),
+    note: NOTE_NAMES[bestKey],
+    mode: bestMode,
+    score: bestScore
+  };
+}
+
+// ---- Camelot mapping ----
+const CAMELOT = {
+  'C':'8B','G':'9B','D':'10B','A':'11B','E':'12B','B':'1B',
+  'F#':'2B','C#':'3B','G#':'4B','D#':'5B','A#':'6B','F':'7B',
+  'Am':'8A','Em':'9A','Bm':'10A','F#m':'11A','C#m':'12A','G#m':'1A',
+  'D#m':'2A','A#m':'3A','Fm':'4A','Cm':'5A','Gm':'6A','Dm':'7A'
+};
+
+// ---- Message handler ----
+self.onmessage = function(e) {
+  const { type, buffer, sampleRate, duration } = e.data;
+  if (type !== 'analyze') return;
+
+  try {
+    const samples = new Float32Array(buffer);
+    const totalSteps = 3;
+    let step = 0;
+
+    // Step 1: BPM
+    self.postMessage({ type: 'progress', stage: 'Detecting tempo…', pct: Math.round((step / totalSteps) * 100) });
+    const bpmResult = detectBPM(samples, sampleRate);
+    step++;
+
+    // Step 2: Key
+    self.postMessage({ type: 'progress', stage: 'Detecting key…', pct: Math.round((step / totalSteps) * 100) });
+    const keyResult = detectKey(samples, sampleRate);
+    step++;
+
+    // Step 3: Finalize
+    self.postMessage({ type: 'progress', stage: 'Done', pct: 100 });
+
+    const camelot = CAMELOT[keyResult.name] || '—';
+
+    self.postMessage({
+      type: 'result',
+      bpm: bpmResult.bpm,
+      confidence: bpmResult.confidence,
+      alternatives: bpmResult.alternatives,
+      key: keyResult.name,
+      note: keyResult.note,
+      mode: keyResult.mode,
+      camelot: camelot,
+      duration: duration
+    });
+  } catch (err) {
+    self.postMessage({ type: 'error', message: err.message || 'Analysis failed' });
+  }
+};
+`;
+
+// ---- DOM refs ----
+const toolCover    = document.getElementById('toolCover');
+const toolProgress = document.getElementById('toolProgress');
+const toolError    = document.getElementById('toolError');
+const toolResults  = document.getElementById('toolResults');
+const errorMsg     = document.getElementById('errorMsg');
+const retryBtn     = document.getElementById('retryBtn');
+const fileInput    = document.getElementById('fileInput');
+const dropZone     = document.getElementById('dropZone');
+const progressFill = document.getElementById('progressFill');
+const progressWrap = document.getElementById('progressWrap');
+const progressStage = document.getElementById('progressStage');
+const bpmNumber    = document.getElementById('bpmNumber');
+const keyValue     = document.getElementById('keyValue');
+const camelotValue = document.getElementById('camelotValue');
+const durationItem = document.getElementById('durationItem');
+const durationValue = document.getElementById('durationValue');
+const confidenceValue = document.getElementById('confidenceValue');
+const resultDetails = document.getElementById('resultDetails');
+const resultActions = document.getElementById('resultActions');
+const tapBtn       = document.getElementById('tapBtn');
+const tapHint      = document.getElementById('tapHint');
+const tapResetBtn  = document.getElementById('tapResetBtn');
+const reuploadBtn  = document.getElementById('reuploadBtn');
+const bpmTable     = document.getElementById('bpmTable');
+
+// ---- State ----
+let worker = null;
+let currentBPM = 0;
+let currentAlternatives = [];
+let tapTimes = [];
+let tapTimeout = null;
+
+// ---- Helpers ----
+function show(el) { el.classList.remove('hidden'); }
+function hide(el) { el.classList.add('hidden'); }
+
+function switchUploadView(view) {
+  hide(toolCover); hide(toolProgress); hide(toolError);
+  if (view === 'cover') show(toolCover);
+  else if (view === 'progress') show(toolProgress);
+  else if (view === 'error') show(toolError);
+}
+
+function formatDuration(seconds) {
+  const m = Math.floor(seconds / 60);
+  const s = Math.floor(seconds % 60);
+  return m + ':' + (s < 10 ? '0' : '') + s;
+}
+
+function setProgress(pct, stage) {
+  progressFill.style.width = pct + '%';
+  progressWrap.setAttribute('aria-valuenow', pct);
+  if (stage) progressStage.textContent = stage;
+}
+
+function createWorker() {
+  const blob = new Blob([WORKER_SRC], { type: 'text/javascript' });
+  const url = URL.createObjectURL(blob);
+  worker = new Worker(url);
+  worker.onmessage = onWorkerMessage;
+  worker.onerror = function(e) {
+    showError('Worker error: ' + (e.message || 'unknown'));
+  };
+}
+
+function onWorkerMessage(e) {
+  const msg = e.data;
+  if (msg.type === 'progress') {
+    setProgress(msg.pct, msg.stage);
+  } else if (msg.type === 'result') {
+    displayResults(msg);
+  } else if (msg.type === 'error') {
+    showError(msg.message);
+  }
+}
+
+function showError(message) {
+  errorMsg.textContent = message;
+  switchUploadView('error');
+}
+
+function setConfidenceBadge(level) {
+  const confMap = { high: 'High', medium: 'Medium', low: 'Low' };
+  confidenceValue.innerHTML = '<span class="confidence-badge ' + level + '">' + confMap[level] + '</span>';
+}
+
+function highlightGenreRow(bpm) {
+  if (!bpmTable) return;
+  bpmTable.querySelectorAll('tr').forEach(function(tr) { tr.classList.remove('row-hit'); });
+  if (!bpm) return;
+  const row = Array.prototype.find.call(
+    bpmTable.querySelectorAll('tbody tr'),
+    function(tr) {
+      return bpm >= parseInt(tr.dataset.min, 10) && bpm <= parseInt(tr.dataset.max, 10);
+    }
+  );
+  if (row) row.classList.add('row-hit');
+}
+
+function displayResults(data) {
+  currentBPM = data.bpm;
+  currentAlternatives = data.alternatives;
+  bpmNumber.textContent = data.bpm;
+  // display key nicely: "C# minor" or "F major"
+  keyValue.textContent = data.mode === 'minor' ? data.note + ' minor' : data.note + ' major';
+  camelotValue.textContent = data.camelot;
+  durationValue.textContent = formatDuration(data.duration);
+  setConfidenceBadge(data.confidence);
+
+  // Alternative tempo buttons
+  resultActions.innerHTML = '';
+  if (data.alternatives && data.alternatives.length > 0) {
+    data.alternatives.forEach(function(alt) {
+      const btn = document.createElement('button');
+      btn.className = 'btn btn-accent';
+      btn.type = 'button';
+      const isHalf = alt < data.bpm;
+      btn.textContent = (isHalf ? 'Half speed: ' : 'Double speed: ') + alt + ' BPM';
+      btn.addEventListener('click', function() {
+        bpmNumber.textContent = alt;
+        currentBPM = alt;
+        highlightGenreRow(alt);
+      });
+      resultActions.appendChild(btn);
+    });
+  }
+
+  // Low confidence warning
+  if (data.confidence === 'low') {
+    const warn = document.createElement('p');
+    warn.className = 'low-conf-warn';
+    warn.textContent = 'Low confidence — result may be inaccurate. Try tap tempo to verify.';
+    resultActions.appendChild(warn);
+  }
+
+  highlightGenreRow(data.bpm);
+  show(toolResults);
+}
+
+// ---- Tap mode result ----
+function tapConfidence(times) {
+  // consistency of intervals: stddev/mean
+  if (times.length < 4) return null;
+  const intervals = [];
+  for (let i = 1; i < times.length; i++) intervals.push(times[i] - times[i - 1]);
+  const mean = intervals.reduce((a, b) => a + b, 0) / intervals.length;
+  if (mean <= 0) return null;
+  const variance = intervals.reduce((a, b) => a + (b - mean) * (b - mean), 0) / intervals.length;
+  const cv = Math.sqrt(variance) / mean;
+  if (cv < 0.03) return 'high';
+  if (cv < 0.08) return 'medium';
+  return 'low';
+}
+
+function displayTapResult(bpm, level) {
+  // Hide upload-only fields in tap mode
+  keyValue.textContent = '—';
+  camelotValue.textContent = '—';
+  durationItem.classList.add('hidden');
+  setConfidenceBadge(level);
+  resultActions.innerHTML = '';
+  const note = document.createElement('p');
+  note.className = 'low-conf-warn';
+  note.textContent = 'Measured by tapping. For key + Camelot, upload the audio file instead.';
+  resultActions.appendChild(note);
+  highlightGenreRow(bpm);
+  show(toolResults);
+}
+
+// ---- File handling ----
+const MAX_SIZE = 30 * 1024 * 1024; // 30 MB
+const MAX_DURATION = 12 * 60; // 12 minutes
+
+async function handleFile(file) {
+  // Validate
+  if (!file) return;
+  if (!file.type.startsWith('audio/') && !file.name.match(/\.(mp3|wav|ogg|m4a|aac|flac)$/i)) {
+    showError('Please select an audio file (MP3, WAV, OGG, or M4A).');
+    return;
+  }
+  if (file.size > MAX_SIZE) {
+    showError('File is too large. Maximum size is 30 MB.');
+    return;
+  }
+
+  switchUploadView('progress');
+  setProgress(5, 'Decoding audio…');
+
+  try {
+    const arrayBuf = await file.arrayBuffer();
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    let audioBuffer;
+    try {
+      audioBuffer = await audioCtx.decodeAudioData(arrayBuf);
+    } catch (decErr) {
+      showError('Could not decode this audio file. Try converting to MP3 or WAV.');
+      audioCtx.close();
+      return;
+    }
+
+    const duration = audioBuffer.duration;
+    if (duration > MAX_DURATION) {
+      showError('Audio is too long. Maximum duration is 12 minutes.');
+      audioCtx.close();
+      return;
+    }
+
+    setProgress(15, 'Downsampling…');
+
+    // Downsample to 11025 Hz mono
+    const TARGET_SR = 11025;
+    const offlineCtx = new OfflineAudioContext(1, Math.ceil(duration * TARGET_SR), TARGET_SR);
+    const src = offlineCtx.createBufferSource();
+    src.buffer = audioBuffer;
+    src.connect(offlineCtx.destination);
+    src.start(0);
+    const rendered = await offlineCtx.startRendering();
+    const monoData = rendered.getChannelData(0);
+
+    setProgress(30, 'Analyzing…');
+
+    // Post to worker
+    if (!worker) createWorker();
+    worker.postMessage({
+      type: 'analyze',
+      buffer: monoData.buffer,
+      sampleRate: TARGET_SR,
+      duration: duration
+    }, [monoData.buffer]); // transfer ownership
+
+    audioCtx.close();
+  } catch (err) {
+    showError('Error reading file: ' + (err.message || 'unknown'));
+  }
+}
+
+// ---- Drop zone ----
+dropZone.addEventListener('dragover', function(e) {
+  e.preventDefault();
+  dropZone.classList.add('drag-over');
+});
+
+dropZone.addEventListener('dragleave', function() {
+  dropZone.classList.remove('drag-over');
+});
+
+dropZone.addEventListener('drop', function(e) {
+  e.preventDefault();
+  dropZone.classList.remove('drag-over');
+  const file = e.dataTransfer.files[0];
+  if (file) handleFile(file);
+});
+
+fileInput.addEventListener('change', function() {
+  const file = fileInput.files[0];
+  if (file) handleFile(file);
+});
+
+// Keyboard activation for drop zone
+dropZone.addEventListener('keydown', function(e) {
+  if (e.key === 'Enter' || e.key === ' ') {
+    e.preventDefault();
+    fileInput.click();
+  }
+});
+
+// ---- Retry / Re-upload ----
+retryBtn.addEventListener('click', function() {
+  switchUploadView('cover');
+  fileInput.value = '';
+});
+
+reuploadBtn.addEventListener('click', function() {
+  switchUploadView('cover');
+  fileInput.value = '';
+  hide(toolResults);
+});
+
+// ---- Tap Tempo ----
+function registerTap() {
+  const now = performance.now();
+
+  // Reset if gap > 2s
+  if (tapTimes.length > 0 && now - tapTimes[tapTimes.length - 1] > 2000) {
+    tapTimes = [];
+  }
+
+  tapTimes.push(now);
+
+  if (tapTimes.length >= 4) {
+    // Average interval
+    let totalInterval = 0;
+    for (let i = 1; i < tapTimes.length; i++) {
+      totalInterval += tapTimes[i] - tapTimes[i - 1];
+    }
+    const avgInterval = totalInterval / (tapTimes.length - 1);
+    const tapBPM = Math.round(60000 / avgInterval);
+    bpmNumber.textContent = tapBPM;
+    currentBPM = tapBPM;
+    displayTapResult(tapBPM, tapConfidence(tapTimes));
+    tapHint.textContent = tapTimes.length + ' taps — ' + tapBPM + ' BPM';
+  } else {
+    tapHint.textContent = tapTimes.length + ' tap' + (tapTimes.length > 1 ? 's' : '') + '… keep tapping';
+  }
+
+  // Auto-reset after 2s of inactivity
+  clearTimeout(tapTimeout);
+  tapTimeout = setTimeout(function() {
+    tapTimes = [];
+    tapHint.textContent = 'Tap 4+ times to set tempo manually';
+  }, 2000);
+}
+
+tapBtn.addEventListener('click', registerTap);
+
+tapResetBtn.addEventListener('click', function() {
+  tapTimes = [];
+  clearTimeout(tapTimeout);
+  tapHint.textContent = 'Tap 4+ times in rhythm — result appears below';
+  hide(toolResults);
+});
+
+// Spacebar taps when nothing else has focus, or when the TAP button has focus
+document.addEventListener('keydown', function(e) {
+  if (e.code !== 'Space') return;
+  const target = e.target;
+  const onBody = target === document.body;
+  const onTapBtn = target === tapBtn;
+  if (!onBody && !onTapBtn) return; // don't hijack focus on inputs/buttons
+  if (onBody && tapTimes.length === 0) return; // first activation must be deliberate
+  e.preventDefault();
+  registerTap();
+});
+
+// ---- Init worker on load ----
+createWorker();
+</script>
+</body>
+</html>
