@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>About BPM Finder and How Tempo and Key Detection Works</title>
+  <meta name="description" content="Learn why BPM Finder runs in your browser, how it estimates tempo and song key, who can use it, and where its audio analysis has limits.">
+  <link rel="canonical" href="https://getbpmfinder.com/about/">
+  <!-- Social media cards -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="BPM Finder">
+  <meta property="og:title" content="About BPM Finder and How Tempo and Key Detection Works">
+  <meta property="og:description" content="Learn why BPM Finder runs in your browser, how it estimates tempo and song key, who can use it, and where its audio analysis has limits.">
+  <meta property="og:url" content="https://getbpmfinder.com/about/">
+  <meta property="og:image" content="https://getbpmfinder.com/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="BPM Finder showing a detected tempo of 128 BPM with song key and Camelot code">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="About BPM Finder and How Tempo and Key Detection Works">
+  <meta name="twitter:description" content="Learn why BPM Finder runs in your browser, how it estimates tempo and song key, who can use it, and where its audio analysis has limits.">
+  <meta name="twitter:image" content="https://getbpmfinder.com/og-image.png">
+  <meta name="twitter:image:alt" content="BPM Finder showing a detected tempo of 128 BPM with song key and Camelot code">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%2314161a'/%3E%3Ctext x='16' y='21' font-family='monospace' font-size='14' font-weight='bold' fill='%23ff5c2b' text-anchor='middle'%3E128%3C/text%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <!-- Non-blocking font load: a pending stylesheet would otherwise block script execution -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+  <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet"></noscript>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <a href="/" class="site-logo">BPM Finder</a>
+</header>
+
+<main>
+  <h1>About this tool</h1>
+
+  <section class="info-section">
+    <h2>Why we built BPM Finder</h2>
+    <p>Checking the tempo or key of a song should be a quick step in making a mix, practicing a part, or putting together a playlist. Some online tools ask you to upload the track or create an account before you can see a result. And when a tool reports a tempo that feels wrong, it can take longer to check the number than it took to find it. We built BPM Finder to give you a free way to analyze a track in your browser and judge how much weight to give the result.</p>
+    <p>Choose an audio file to see its estimated BPM, song key, Camelot number, duration, and confidence. The browser does the analysis locally. The file stays on your device, and you can use the tool without creating an account.</p>
+  </section>
+
+  <section class="info-section">
+    <h2>How tempo and key detection work</h2>
+    <p>First, the browser decodes the audio file into a waveform. BPM Finder measures the energy in short slices of that waveform to build an energy envelope. This is a series that shows how the strength of the audio changes over time. Repeating peaks in the envelope can reveal a pulse even when the individual sounds on each beat differ.</p>
+    <p>The tempo estimate comes from autocorrelation. The analysis compares the envelope with shifted copies of itself to find time intervals where the pattern lines up. A recurring interval gives an estimate of the beat spacing, which the tool converts into beats per minute.</p>
+    <p>Key detection uses chroma analysis. It groups pitch energy by note regardless of octave and compares the resulting pattern with profiles for musical keys. The estimated key also appears as a Camelot number so you can read it in the notation used for harmonic mixing.</p>
+  </section>
+
+  <section class="info-section">
+    <h2>Who can use it</h2>
+    <p>DJs can check the tempo and Camelot number while planning a set. Producers can use the estimates as a starting point when checking how two tracks might fit together. Musicians can check the tempo before practicing along with a recording, and runners can compare tracks when building a playlist around a steady rhythm.</p>
+    <p>If you can hear the beat and don't need a file analysis, use <a href="/tap-tempo/">tap tempo</a>. Tap along to estimate the BPM without selecting a file.</p>
+  </section>
+
+  <section class="info-section">
+    <h2>File limits and variable tempos</h2>
+    <p>BPM Finder supports MP3, WAV, OGG, and M4A. A single file can be up to 30 MB and up to 12 minutes long. Tracks with complex tempo changes can produce an inaccurate estimate because different sections may have different beat spacing. If the number seems off, listen to the section you care about and use tap tempo to check its pulse. The confidence value gives you another cue when deciding whether to double-check a result.</p>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-col">
+      <h3>About</h3>
+      <ul>
+        <li><a href="/about/">About</a></li>
+        <li><a href="/contact/">Contact</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h3>Legal</h3>
+      <ul>
+        <li><a href="/privacy/">Privacy</a></li>
+        <li><a href="/terms/">Terms</a></li>
+      </ul>
+    </div>
+  </div>
+  <p class="footer-copy">&copy; 2026 BPM Finder. All processing runs in your browser — audio files never leave your device.</p>
+</footer>
+
+</body>
+</html>
