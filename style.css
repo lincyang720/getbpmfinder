@@ -60,13 +60,19 @@ body {
   border-bottom: 1px solid rgba(255,255,255,0.06);
 }
 
-.site-header span {
+.site-logo {
   font-family: var(--font-heading);
   font-size: 0.875rem;
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--text-muted);
+  text-decoration: none;
+  transition: color var(--transition);
+}
+
+.site-logo:hover {
+  color: var(--text);
 }
 
 /* ---- Main ---- */
@@ -184,6 +190,34 @@ h2 {
 .tap-controls {
   text-align: center;
   margin-top: 0.75rem;
+}
+
+/* Secondary mode card (tap tempo) — visually de-emphasized */
+.mode-secondary {
+  opacity: 0.85;
+}
+
+/* Related tools list */
+.related-list {
+  list-style: none;
+  padding: 0;
+}
+
+.related-list li {
+  margin-bottom: 0.5rem;
+  font-size: 0.875rem;
+  color: var(--text-muted);
+}
+
+.related-list a {
+  color: var(--accent2);
+  font-weight: 500;
+  text-decoration: none;
+  transition: color var(--transition);
+}
+
+.related-list a:hover {
+  color: var(--text);
 }
 
 /* Cover */

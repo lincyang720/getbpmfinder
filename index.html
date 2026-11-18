@@ -28,11 +28,41 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
   <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet"></noscript>
   <link rel="stylesheet" href="style.css">
+  <!-- Structured data: WebApplication + FAQPage -->
+  <script type="application/ld+json">
+  [
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "BPM Finder",
+      "url": "https://getbpmfinder.com/",
+      "applicationCategory": "MultimediaApplication",
+      "operatingSystem": "Any",
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+      "description": "Detect the tempo (BPM) and musical key of any audio file, entirely in your browser. No upload, no signup.",
+      "browserRequirements": "Requires a browser with Web Audio API support (Chrome, Firefox, Safari, Edge)."
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        { "@type": "Question", "name": "Does this work on mobile?", "acceptedAnswer": { "@type": "Answer", "text": "Yes. Both the file analysis and tap tempo run in your mobile browser. Analysis performance depends on your device — a three-minute song typically takes a few seconds on a recent phone." }},
+        { "@type": "Question", "name": "Do I need to sign up?", "acceptedAnswer": { "@type": "Answer", "text": "No. There is no account, no login, no email. Open the page and use it." }},
+        { "@type": "Question", "name": "Is my audio file uploaded to a server?", "acceptedAnswer": { "@type": "Answer", "text": "No. The file is decoded and analyzed entirely inside your browser using the Web Audio API and a local Web Worker. No audio data leaves your device, and nothing is stored after you close the page." }},
+        { "@type": "Question", "name": "Which audio formats are supported?", "acceptedAnswer": { "@type": "Answer", "text": "Whatever your browser can decode: MP3, WAV, OGG, and M4A/AAC all work in Chrome and Edge; Safari adds support for more Apple formats. If a file fails to decode, convert it to MP3 or WAV and try again. The limit is 30 MB and 12 minutes per file." }},
+        { "@type": "Question", "name": "Why might the BPM be off by a factor of two?", "acceptedAnswer": { "@type": "Answer", "text": "Rhythm has an octave ambiguity: the same track can be counted at 80 or 160 BPM depending on which pulses you follow. The detector prefers the 70–180 BPM range and offers the half/double alternative as a one-click button when it exists." }},
+        { "@type": "Question", "name": "What if the detection is inaccurate?", "acceptedAnswer": { "@type": "Answer", "text": "Check the confidence marker. Low confidence usually means the track has no clear beat (ambient, classical, field recordings). Two fixes: use tap tempo to measure the beat yourself, or try a section of the song with drums." }},
+        { "@type": "Question", "name": "Can I analyze multiple files at once?", "acceptedAnswer": { "@type": "Answer", "text": "Not in this version — one file at a time. Click \"Analyze another file\" to start the next one." }},
+        { "@type": "Question", "name": "Is this free?", "acceptedAnswer": { "@type": "Answer", "text": "Yes, completely. No limits, no account, no ads." }}
+      ]
+    }
+  ]
+  </script>
 </head>
 <body>
 
 <header class="site-header">
-  <span>BPM Finder</span>
+  <a href="/" class="site-logo">BPM Finder</a>
 </header>
 
 <main>
@@ -76,8 +106,8 @@
       </div>
     </section>
 
-    <!-- Mode 2: tap tempo -->
-    <section class="mode-card" aria-label="Tap tempo to find BPM">
+    <!-- Mode 2: tap tempo (secondary entry) -->
+    <section class="mode-card mode-secondary" aria-label="Tap tempo to find BPM">
       <h2 class="mode-title">Tap tempo</h2>
       <button class="tap-btn tap-btn-big" id="tapBtn" type="button" aria-label="Tap tempo: tap 4 or more times to get BPM">TAP<br><span class="tap-btn-sub">tap here / press space</span></button>
       <p class="tap-hint" id="tapHint">Tap 4+ times in rhythm — result appears below</p>
@@ -212,6 +242,16 @@
       <div class="faq-answer">Yes, completely. No limits, no account, no ads.</div>
     </details>
   </section>
+
+  <!-- ============ Related tools ============ -->
+  <section class="info-section">
+    <h2>Related tools</h2>
+    <ul class="related-list">
+      <li><a href="/tap-tempo/">Tap Tempo</a> — find BPM by tapping the beat with your keyboard or finger, no audio file needed.</li>
+      <li><a href="/song-key-finder/">Song Key Finder</a> — detect the musical key and Camelot code of any track, useful for DJs and producers.</li>
+      <li><a href="/bpm-counter/">BPM Counter</a> — count beats over a fixed time window to measure tempo manually.</li>
+    </ul>
+  </section>
 </main>
 
 <footer class="site-footer">
@@ -219,16 +259,15 @@
     <div class="footer-col">
       <h3>About</h3>
       <ul>
-        <li><a href="#">About</a></li>
-        <li><a href="#">Contact</a></li>
+        <li><a href="/about/">About</a></li>
+        <li><a href="/contact/">Contact</a></li>
       </ul>
     </div>
     <div class="footer-col">
       <h3>Legal</h3>
       <ul>
-        <li><a href="#">Privacy</a></li>
-        <li><a href="#">Terms</a></li>
-        <li><a href="#">Copyright complaints</a></li>
+        <li><a href="/privacy/">Privacy</a></li>
+        <li><a href="/terms/">Terms</a></li>
       </ul>
     </div>
   </div>
