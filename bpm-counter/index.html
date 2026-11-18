@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>BPM Counter — Count Beats to Measure Tempo Online, Free</title>
+  <meta name="description" content="Free online BPM counter. Count the beats in any song for a set time window, then get the tempo in beats per minute. Runs in your browser, no upload needed.">
+  <link rel="canonical" href="https://getbpmfinder.com/bpm-counter/">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="BPM Finder">
+  <meta property="og:title" content="BPM Counter — Count Beats to Measure Tempo">
+  <meta property="og:description" content="Count the beats in any song for a fixed time window to find the BPM. Free, instant, no upload.">
+  <meta property="og:url" content="https://getbpmfinder.com/bpm-counter/">
+  <meta property="og:image" content="https://getbpmfinder.com/og-image.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="BPM Counter — Count Beats to Measure Tempo">
+  <meta name="twitter:description" content="Count the beats in any song for a fixed time window to find the BPM. Free, no upload.">
+  <meta name="twitter:image" content="https://getbpmfinder.com/og-image.png">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%2314161a'/%3E%3Ctext x='16' y='21' font-family='monospace' font-size='12' font-weight='bold' fill='%23ff5c2b' text-anchor='middle'%3ECNT%3C/text%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght=600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+  <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght=600;700&display=swap" rel="stylesheet"></noscript>
+  <link rel="stylesheet" href="/style.css">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "BPM Counter",
+    "url": "https://getbpmfinder.com/bpm-counter/",
+    "applicationCategory": "MultimediaApplication",
+    "operatingSystem": "Any",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+    "description": "Count beats over a fixed time window to find the BPM of any song. Free, runs in your browser."
+  }
+  </script>
+</head>
+<body>
+
+<header class="site-header">
+  <a href="/" class="site-logo">BPM Finder</a>
+</header>
+
+<main>
+  <h1>BPM Counter</h1>
+
+  <div class="trust-badges" aria-label="Key promises">
+    <span>No audio file needed</span>
+    <span>Works instantly</span>
+    <span>Free</span>
+  </div>
+
+  <section class="tap-tool-panel" aria-label="BPM counter tool">
+    <p class="counter-instructions">Press <strong>COUNT</strong> (or spacebar) on each beat. The timer runs for the selected window, then calculates BPM.</p>
+    <div class="counter-controls">
+      <label class="counter-label" for="windowSelect">Count window:</label>
+      <select id="windowSelect" class="counter-select">
+        <option value="15">15 seconds</option>
+        <option value="30" selected>30 seconds</option>
+        <option value="60">60 seconds</option>
+      </select>
+    </div>
+    <button class="tap-btn tap-btn-big" id="countBtn" type="button" aria-label="Count a beat">COUNT<br><span class="tap-btn-sub">press on each beat / spacebar</span></button>
+    <div class="counter-status" id="counterStatus">
+      <span id="countDisplay">0</span> beats · <span id="timeDisplay">0.0</span>s
+    </div>
+    <div class="tap-controls">
+      <button class="btn" id="resetBtn" type="button">Reset</button>
+    </div>
+  </section>
+
+  <section id="counterResults" class="tool-results-panel hidden" aria-label="Counter result" aria-live="polite">
+    <div class="bpm-readout">
+      <span class="bpm-tick-top" aria-hidden="true"></span>
+      <div class="bpm-number" id="bpmNumber">—</div>
+      <span class="bpm-tick-bottom" aria-hidden="true"></span>
+      <span class="bpm-unit">BPM</span>
+    </div>
+    <div class="result-details">
+      <div class="result-item"><span class="result-label">Beats counted</span><span class="result-value" id="beatsValue">—</span></div>
+      <div class="result-item"><span class="result-label">Window</span><span class="result-value" id="windowValue">—</span></div>
+    </div>
+  </section>
+
+  <section class="info-section">
+    <h2>How a BPM counter works</h2>
+    <p>A BPM counter is the simplest way to measure tempo: you count how many beats occur in a known time window, then scale the count to one minute. If you hear 32 beats in 30 seconds, the tempo is 32 × 2 = 64 BPM. If you count 64 beats in 30 seconds, that is 128 BPM. The math is just multiplication — no algorithm, no audio analysis, no file upload. You are the detector.</p>
+    <p>This page automates the counting and the multiplication. Press the COUNT button (or your spacebar) on each beat you hear. A timer starts on your first press and runs for the window you selected (15, 30, or 60 seconds). When the window expires, the total beat count is converted to BPM and displayed. You can also stop early by pressing Reset — the tool will compute from whatever count you have.</p>
+    <p>A longer window gives a more accurate result because you spread out the timing error of each tap over more beats. 30 seconds is a good default: fast enough to be practical, long enough to be accurate within 1–2 BPM for most people. Use 60 seconds if you want sub-BPM precision, or 15 seconds if you need a quick estimate.</p>
+  </section>
+
+  <section class="info-section">
+    <h2>BPM counter vs. tap tempo</h2>
+    <p>Both tools measure tempo by having you tap along with the music, but they work differently. A <a href="/tap-tempo/">tap tempo</a> tool computes the average interval between your taps and inverts it to BPM — it updates after every tap and gets more precise as you keep going. A BPM counter uses a fixed time window and simply divides the beat count by the elapsed time. Tap tempo is faster and more convenient for experienced users; a counter is easier to explain and verify because the logic is transparent: "I counted 64 beats in 30 seconds, so it is 128 BPM." Use whichever one feels natural — both give the same answer if your tapping is consistent.</p>
+  </section>
+
+  <section class="info-section">
+    <h2>When to count beats instead of using auto-detection</h2>
+    <p>Automatic BPM detection — like the <a href="/">BPM Finder</a> upload tool — analyzes the audio waveform for periodic energy patterns. It works well for tracks with steady drums but struggles with music that lacks clear transients: ambient, classical, spoken word, or live acoustic performances. When the algorithm cannot find a beat, it says so with a low confidence marker. In those cases, counting beats by ear is the fallback that always works, because you hear the rhythm the algorithm cannot see.</p>
+    <p>Counting is also useful when you do not have the audio file. If you are listening to a record, a livestream, or a song on the radio, you can open this page on your phone and count along — no file, no upload, no account. The result is just as accurate as automatic detection for any track where you can reliably follow the beat.</p>
+  </section>
+
+  <section class="info-section">
+    <h2>Related tools</h2>
+    <ul class="related-list">
+      <li><a href="/">BPM Finder</a> — upload an audio file to detect BPM and key automatically.</li>
+      <li><a href="/tap-tempo/">Tap Tempo</a> — find BPM by tapping the beat continuously.</li>
+      <li><a href="/song-key-finder/">Song Key Finder</a> — detect the musical key and Camelot code of any track.</li>
+    </ul>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-col"><h3>About</h3><ul><li><a href="/about/">About</a></li><li><a href="/contact/">Contact</a></li></ul></div>
+    <div class="footer-col"><h3>Legal</h3><ul><li><a href="/privacy/">Privacy</a></li><li><a href="/terms/">Terms</a></li></ul></div>
+  </div>
+  <p class="footer-copy">&copy; 2026 BPM Finder. All processing runs in your browser.</p>
+</footer>
+
+<script>
+const countBtn = document.getElementById('countBtn');
+const resetBtn = document.getElementById('resetBtn');
+const windowSelect = document.getElementById('windowSelect');
+const countDisplay = document.getElementById('countDisplay');
+const timeDisplay = document.getElementById('timeDisplay');
+const counterResults = document.getElementById('counterResults');
+const bpmNumber = document.getElementById('bpmNumber');
+const beatsValue = document.getElementById('beatsValue');
+const windowValue = document.getElementById('windowValue');
+
+let beatCount = 0;
+let startTime = null;
+let timerInterval = null;
+let windowSec = 30;
+
+windowSelect.addEventListener('change', () => { windowSec = parseInt(windowSelect.value, 10); });
+
+function finishCounting() {
+  clearInterval(timerInterval);
+  if (beatCount < 2) { resetCounter(); return; }
+  const elapsed = (performance.now() - startTime) / 1000;
+  const bpm = Math.round((beatCount / elapsed) * 60);
+  bpmNumber.textContent = bpm;
+  beatsValue.textContent = beatCount;
+  windowValue.textContent = elapsed.toFixed(1) + 's';
+  counterResults.classList.remove('hidden');
+  countBtn.disabled = true;
+}
+
+function resetCounter() {
+  beatCount = 0; startTime = null;
+  clearInterval(timerInterval);
+  countDisplay.textContent = '0';
+  timeDisplay.textContent = '0.0';
+  counterResults.classList.add('hidden');
+  countBtn.disabled = false;
+}
+
+function registerBeat() {
+  if (countBtn.disabled) return;
+  const now = performance.now();
+  if (beatCount === 0) {
+    startTime = now;
+    timerInterval = setInterval(() => {
+      const elapsed = (performance.now() - startTime) / 1000;
+      timeDisplay.textContent = elapsed.toFixed(1);
+      if (elapsed >= windowSec) finishCounting();
+    }, 100);
+  }
+  beatCount++;
+  countDisplay.textContent = beatCount;
+  const elapsed = (now - startTime) / 1000;
+  timeDisplay.textContent = elapsed.toFixed(1);
+  if (elapsed >= windowSec) finishCounting();
+}
+
+countBtn.addEventListener('click', registerBeat);
+resetBtn.addEventListener('click', resetCounter);
+document.addEventListener('keydown', e => {
+  if (e.code !== 'Space') return;
+  if (e.target === document.body || e.target === countBtn) { e.preventDefault(); registerBeat(); }
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tap Tempo — Find BPM by Tapping the Beat, Free Online</title>
+  <meta name="description" content="Free online tap tempo: tap your keyboard or screen in rhythm to find the BPM of any song. No audio file needed, works instantly in your browser.">
+  <link rel="canonical" href="https://getbpmfinder.com/tap-tempo/">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="BPM Finder">
+  <meta property="og:title" content="Tap Tempo — Find BPM by Tapping the Beat">
+  <meta property="og:description" content="Tap your keyboard in rhythm to find the BPM of any song. Free, instant, no upload needed.">
+  <meta property="og:url" content="https://getbpmfinder.com/tap-tempo/">
+  <meta property="og:image" content="https://getbpmfinder.com/og-image.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Tap Tempo — Find BPM by Tapping the Beat">
+  <meta name="twitter:description" content="Tap your keyboard in rhythm to find the BPM of any song. Free, instant, no upload needed.">
+  <meta name="twitter:image" content="https://getbpmfinder.com/og-image.png">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%2314161a'/%3E%3Ctext x='16' y='21' font-family='monospace' font-size='14' font-weight='bold' fill='%23ff5c2b' text-anchor='middle'%3ETAP%3C/text%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+  <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght=600;700&display=swap" rel="stylesheet"></noscript>
+  <link rel="stylesheet" href="/style.css">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "Tap Tempo",
+    "url": "https://getbpmfinder.com/tap-tempo/",
+    "applicationCategory": "MultimediaApplication",
+    "operatingSystem": "Any",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+    "description": "Find the BPM of any song by tapping the beat with your keyboard or screen. Free, instant, no audio file needed."
+  }
+  </script>
+</head>
+<body>
+
+<header class="site-header">
+  <a href="/" class="site-logo">BPM Finder</a>
+</header>
+
+<main>
+  <h1>Tap Tempo</h1>
+
+  <div class="trust-badges" aria-label="Key promises">
+    <span>No audio file needed</span>
+    <span>Works instantly</span>
+    <span>Free</span>
+  </div>
+
+  <!-- Tap tempo tool -->
+  <section class="tap-tool-panel" aria-label="Tap tempo tool">
+    <button class="tap-btn tap-btn-big" id="tapBtn" type="button" aria-label="Tap tempo: tap 4 or more times to get BPM">TAP<br><span class="tap-btn-sub">tap here / press space</span></button>
+    <p class="tap-hint" id="tapHint">Tap 4+ times in rhythm — BPM appears below</p>
+    <div class="tap-controls">
+      <button class="btn" id="tapResetBtn" type="button">Reset taps</button>
+    </div>
+  </section>
+
+  <!-- Shared result panel -->
+  <section id="tapResults" class="tool-results-panel hidden" aria-label="Tap tempo result" aria-live="polite">
+    <div class="bpm-readout">
+      <span class="bpm-tick-top" aria-hidden="true"></span>
+      <div class="bpm-number" id="bpmNumber">—</div>
+      <span class="bpm-tick-bottom" aria-hidden="true"></span>
+      <span class="bpm-unit">BPM</span>
+    </div>
+    <div class="result-details">
+      <div class="result-item">
+        <span class="result-label">Confidence</span>
+        <span class="result-value" id="confidenceValue">—</span>
+      </div>
+      <div class="result-item">
+        <span class="result-label">Taps</span>
+        <span class="result-value" id="tapCount">—</span>
+      </div>
+    </div>
+    <div class="result-actions">
+      <button class="btn" id="halfBtn" type="button" style="display:none">Half speed</button>
+      <button class="btn" id="doubleBtn" type="button" style="display:none">Double speed</button>
+    </div>
+  </section>
+
+  <!-- Genre reference table -->
+  <section class="info-section">
+    <h2>What your BPM means — genre reference</h2>
+    <p>Tempo is a strong clue about genre. When a result appears above, the matching row lights up.</p>
+    <table class="bpm-table" id="bpmTable">
+      <thead><tr><th scope="col">BPM range</th><th scope="col">Typical genres</th></tr></thead>
+      <tbody>
+        <tr data-min="0" data-max="69"><td>60–69</td><td>Ballads, downtempo, ambient</td></tr>
+        <tr data-min="70" data-max="89"><td>70–89</td><td>Hip-hop, boom bap, lo-fi, reggae</td></tr>
+        <tr data-min="90" data-max="109"><td>90–109</td><td>Pop, R&amp;B, soul, funk</td></tr>
+        <tr data-min="110" data-max="119"><td>110–119</td><td>Deep house, disco, afrobeats</td></tr>
+        <tr data-min="120" data-max="127"><td>120–127</td><td>House, tech house, techno</td></tr>
+        <tr data-min="128" data-max="139"><td>128–139</td><td>Trance, progressive house, dubstep (half-time)</td></tr>
+        <tr data-min="140" data-max="159"><td>140–159</td><td>Trap, hardstyle, UK garage</td></tr>
+        <tr data-min="160" data-max="180"><td>160–180</td><td>Drum &amp; bass, jungle</td></tr>
+        <tr data-min="181" data-max="220"><td>180–220</td><td>Juke, footwork, extreme metal</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="info-section">
+    <h2>How tap tempo works</h2>
+    <p>Tap tempo measures the time interval between your taps and converts it to beats per minute. After four or more taps the average interval is computed, and the result keeps refining as you keep tapping. This is the same mechanism found in DJ software, hardware samplers, and digital audio workstations — it is the most reliable way to confirm a tempo when automatic detection is uncertain or unavailable.</p>
+    <p>On this page you can tap by clicking the button, or by pressing the spacebar on your keyboard. The tool resets automatically if more than two seconds pass between taps, so you can start a fresh measurement at any time without pressing Reset. If you want to start completely over, the Reset button clears all tap history.</p>
+    <p>The confidence indicator shows how consistent your tapping is. A "High" confidence means the intervals between your taps vary by less than 3% — essentially a metronomic feel. "Medium" allows up to 8% variation, and "Low" means your tapping is inconsistent enough that the BPM reading should be taken as an estimate. Practicing along with the track for a few more seconds usually tightens the result.</p>
+  </section>
+
+  <section class="info-section">
+    <h2>When to use tap tempo instead of auto-detection</h2>
+    <p>Automatic BPM detection analyzes the audio waveform and looks for periodic energy patterns. It works well for tracks with clear, steady drums — four-on-the-floor kicks, snare back5 backbeats, hi-hat patterns. But many kinds of music do not provide that signal. Ambient pads, solo piano, classical strings, spoken word, and field recordings lack the transient spikes that algorithms lock onto. For these tracks, tap tempo is the only option.</p>
+    <p>Tap tempo is also the fastest sanity check. If an automatic detector returns a number that feels wrong, you can verify it in five seconds by tapping along. The two most common mismatches are half-time and double-time — a track at 80 BPM read as 160, or vice versa. A few taps settle the question.</p>
+    <p>Finally, tap tempo is useful when you do not have the audio file handy. If you are listening to a track on streaming, vinyl, or in a live set, you can tap along on your phone or laptop without uploading anything. The <a href="/">BPM Finder</a> home page offers both modes: upload analysis for when you have the file, and tap tempo for when you do not.</p>
+  </section>
+
+  <section class="info-section">
+    <h2>Tap tempo vs. BPM counter</h2>
+    <p>A tap tempo tool and a BPM counter solve the same problem from different directions. Tap tempo measures the average interval between your taps and inverts it to a frequency (BPM). A <a href="/bpm-counter/">BPM counter</a> typically asks you to count beats for a fixed window — say 15 or 30 seconds — then multiplies to get a per-minute rate. Tap tempo is faster and more precise for experienced users; a counter is simpler to understand for beginners who are not sure how "tapping" translates to a number.</p>
+  </section>
+
+  <section class="info-section">
+    <h2>Related tools</h2>
+    <ul class="related-list">
+      <li><a href="/">BPM Finder</a> — upload an audio file to detect BPM, key, and Camelot code automatically.</li>
+      <li><a href="/song-key-finder/">Song Key Finder</a> — detect the musical key and Camelot code of any track.</li>
+      <li><a href="/bpm-counter/">BPM Counter</a> — count beats over a fixed time window to measure tempo.</li>
+    </ul>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-col">
+      <h3>About</h3>
+      <ul>
+        <li><a href="/about/">About</a></li>
+        <li><a href="/contact/">Contact</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h3>Legal</h3>
+      <ul>
+        <li><a href="/privacy/">Privacy</a></li>
+        <li><a href="/terms/">Terms</a></li>
+      </ul>
+    </div>
+  </div>
+  <p class="footer-copy">&copy; 2026 BPM Finder. All processing runs in your browser.</p>
+</footer>
+
+<script>
+const tapBtn = document.getElementById('tapBtn');
+const tapHint = document.getElementById('tapHint');
+const tapResetBtn = document.getElementById('tapResetBtn');
+const tapResults = document.getElementById('tapResults');
+const bpmNumber = document.getElementById('bpmNumber');
+const confidenceValue = document.getElementById('confidenceValue');
+const tapCountEl = document.getElementById('tapCount');
+const halfBtn = document.getElementById('halfBtn');
+const doubleBtn = document.getElementById('doubleBtn');
+const bpmTable = document.getElementById('bpmTable');
+
+let tapTimes = [];
+let tapTimeout = null;
+let currentBPM = 0;
+
+function show(el) { el.classList.remove('hidden'); }
+function hide(el) { el.classList.add('hidden'); }
+
+function setConfidenceBadge(level) {
+  const map = { high: 'High', medium: 'Medium', low: 'Low' };
+  confidenceValue.innerHTML = '<span class="confidence-badge ' + level + '">' + map[level] + '</span>';
+}
+
+function tapConfidence(times) {
+  if (times.length < 4) return null;
+  const intervals = [];
+  for (let i = 1; i < times.length; i++) intervals.push(times[i] - times[i - 1]);
+  const mean = intervals.reduce((a, b) => a + b, 0) / intervals.length;
+  if (mean <= 0) return null;
+  const variance = intervals.reduce((a, b) => a + (b - mean) ** 2, 0) / intervals.length;
+  const cv = Math.sqrt(variance) / mean;
+  if (cv < 0.03) return 'high';
+  if (cv < 0.08) return 'medium';
+  return 'low';
+}
+
+function highlightGenreRow(bpm) {
+  if (!bpmTable) return;
+  bpmTable.querySelectorAll('tr').forEach(tr => tr.classList.remove('row-hit'));
+  if (!bpm) return;
+  const row = Array.prototype.find.call(
+    bpmTable.querySelectorAll('tbody tr'),
+    tr => bpm >= parseInt(tr.dataset.min, 10) && bpm <= parseInt(tr.dataset.max, 10)
+  );
+  if (row) row.classList.add('row-hit');
+}
+
+function registerTap() {
+  const now = performance.now();
+  if (tapTimes.length > 0 && now - tapTimes[tapTimes.length - 1] > 2000) tapTimes = [];
+  tapTimes.push(now);
+
+  if (tapTimes.length >= 4) {
+    let totalInterval = 0;
+    for (let i = 1; i < tapTimes.length; i++) totalInterval += tapTimes[i] - tapTimes[i - 1];
+    const avg = totalInterval / (tapTimes.length - 1);
+    currentBPM = Math.round(60000 / avg);
+    bpmNumber.textContent = currentBPM;
+    setConfidenceBadge(tapConfidence(tapTimes));
+    tapCountEl.textContent = tapTimes.length;
+    show(tapResults);
+    halfBtn.style.display = (currentBPM / 2 >= 50) ? '' : 'none';
+    doubleBtn.style.display = (currentBPM * 2 <= 220) ? '' : 'none';
+    highlightGenreRow(currentBPM);
+    tapHint.textContent = tapTimes.length + 'taps — ' + currentBPM + ' BPM';
+  } else {
+    tapHint.textContent = tapTimes.length + ' tap' + (tapTimes.length > 1 ? 's' : '') + '… keep tapping';
+  }
+  clearTimeout(tapTimeout);
+  tapTimeout = setTimeout(() => { tapTimes = []; tapHint.textContent = 'Tap 4+ times in rhythm — BPM appears below'; }, 2000);
+}
+
+tapBtn.addEventListener('click', registerTap);
+tapResetBtn.addEventListener('click', () => {
+  tapTimes = []; clearTimeout(tapTimeout); hide(tapResults);
+  tapHint.textContent = 'Tap 4+ times in rhythm — BPM appears below';
+  halfBtn.style.display = 'none'; doubleBtn.style.display = 'none';
+});
+halfBtn.addEventListener('click', () => { currentBPM = Math.round(currentBPM / 2); bpmNumber.textContent = currentBPM; highlightGenreRow(currentBPM); });
+doubleBtn.addEventListener('click', () => { currentBPM = currentBPM * 2; bpmNumber.textContent = currentBPM; highlightGenreRow(currentBPM); });
+
+document.addEventListener('keydown', e => {
+  if (e.code !== 'Space') return;
+  const onBody = e.target === document.body, onTapBtn = e.target === tapBtn;
+  if (!onBody && !onTapBtn) return;
+  if (onBody && tapTimes.length === 0) return;
+  e.preventDefault(); registerTap();
+});
+</script>
+</body>
+</html>

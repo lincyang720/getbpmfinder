@@ -220,6 +220,78 @@ h2 {
   color: var(--text);
 }
 
+/* ---- Tap-tool panel (inner pages) ---- */
+.tap-tool-panel {
+  background: var(--card);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: var(--radius);
+  padding: 2rem 1.5rem;
+  margin-bottom: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+/* ---- BPM Counter specific ---- */
+.counter-instructions {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  text-align: center;
+  max-width: 400px;
+}
+
+.counter-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.counter-label {
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+}
+
+.counter-select {
+  font-family: var(--font-body);
+  font-size: 0.8125rem;
+  padding: 0.3rem 0.6rem;
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: var(--radius);
+  background: var(--card-hover);
+  color: var(--text);
+}
+
+.counter-status {
+  font-family: var(--font-heading);
+  font-size: 1rem;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.counter-status strong {
+  color: var(--accent);
+}
+
+/* ---- Tap-link (homepage) ---- */
+.tap-link {
+  text-align: center;
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  margin-bottom: 1rem;
+}
+
+.tap-link a {
+  color: var(--accent2);
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.tap-link a:hover {
+  color: var(--text);
+}
+
 /* Cover */
 .drop-zone {
   position: relative;
