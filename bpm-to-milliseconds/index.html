@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>BPM to milliseconds converter for delay times | Free</title>
+  <meta name="description" content="Free BPM to milliseconds converter for delay, samples, and compressor timing. Runs locally in your browser with no signup or upload required.">
+  <link rel="canonical" href="https://getbpmfinder.com/bpm-to-milliseconds/">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="BPM Finder">
+  <meta property="og:title" content="BPM to milliseconds converter for delay times">
+  <meta property="og:description" content="Convert BPM to note lengths in milliseconds for delay, sample alignment, and compressor timing. Free and calculated locally.">
+  <meta property="og:url" content="https://getbpmfinder.com/bpm-to-milliseconds/">
+  <meta property="og:image" content="https://getbpmfinder.com/og-image.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="BPM to milliseconds converter for delay times">
+  <meta name="twitter:description" content="Convert BPM to note lengths in milliseconds for delay, sample alignment, and compressor timing.">
+  <meta name="twitter:image" content="https://getbpmfinder.com/og-image.png">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%2314161a'/%3E%3Ctext x='16' y='21' font-family='monospace' font-size='11' font-weight='bold' fill='%23ff5c2b' text-anchor='middle'%3EMS%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="/style.css">
+  <style>
+    .site-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .site-nav {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 0.85rem;
+      font-size: 0.8125rem;
+    }
+
+    .site-nav a {
+      color: var(--text-muted);
+      text-decoration: none;
+    }
+
+    .site-nav a:hover,
+    .site-nav a:focus-visible {
+      color: var(--text);
+    }
+
+    .converter-panel {
+      background: var(--card);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: var(--radius);
+      padding: 1.25rem;
+      margin-bottom: 2rem;
+    }
+
+    .converter-controls {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .converter-field {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    .converter-field label {
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .converter-input,
+    .converter-select {
+      width: 100%;
+      min-height: 44px;
+      padding: 0.7rem 0.75rem;
+      border: 1px solid rgba(255,255,255,0.14);
+      border-radius: var(--radius);
+      background: var(--bg);
+      color: var(--text);
+      font: inherit;
+    }
+
+    .converter-input:focus,
+    .converter-select:focus {
+      border-color: var(--accent);
+      outline: 2px solid rgba(255,92,43,0.2);
+      outline-offset: 1px;
+    }
+
+    .input-message {
+      min-height: 1.4em;
+      margin: 0 0 0.75rem;
+      color: #ff9b7c;
+      font-size: 0.8125rem;
+    }
+
+    .selected-result {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 0.85rem 1rem;
+      margin-bottom: 0.75rem;
+      border-left: 3px solid var(--accent);
+      background: rgba(255,255,255,0.035);
+    }
+
+    .selected-result span:first-child {
+      color: var(--text-muted);
+      font-size: 0.8125rem;
+    }
+
+    .selected-result strong {
+      color: var(--accent);
+      font-family: var(--font-heading);
+      font-size: 1.35rem;
+    }
+
+    .note-results {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.5rem;
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .note-result {
+      display: flex;
+      justify-content: space-between;
+      gap: 0.75rem;
+      padding: 0.7rem 0.75rem;
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: var(--radius);
+      color: var(--text-muted);
+      font-size: 0.8125rem;
+    }
+
+    .note-result output {
+      color: var(--text);
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .note-result.is-selected {
+      border-color: var(--accent);
+      color: var(--text);
+    }
+
+    .results-invalid .note-result output,
+    .results-invalid .selected-result strong {
+      color: var(--text-muted);
+    }
+
+    .chart-wrap {
+      overflow-x: auto;
+      margin: 0.75rem 0;
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: var(--radius);
+    }
+
+    .conversion-table {
+      min-width: 980px;
+      margin: 0;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .conversion-table caption {
+      padding: 0.7rem;
+      color: var(--text-muted);
+      text-align: left;
+      caption-side: top;
+    }
+
+    .conversion-table th,
+    .conversion-table td {
+      white-space: nowrap;
+      text-align: right;
+    }
+
+    .conversion-table th:first-child,
+    .conversion-table td:first-child {
+      position: sticky;
+      left: 0;
+      z-index: 1;
+      text-align: left;
+      background: var(--card);
+    }
+
+    .use-case h3 {
+      margin: 1.25rem 0 0.4rem;
+      color: var(--text);
+      font-size: 1rem;
+    }
+
+    .formula {
+      padding: 0.85rem 1rem;
+      border-left: 3px solid var(--accent2);
+      background: var(--card);
+      color: var(--text);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      overflow-wrap: anywhere;
+    }
+
+    @media (max-width: 620px) {
+      .site-header {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .site-nav {
+        justify-content: flex-start;
+      }
+
+      .converter-controls,
+      .note-results {
+        grid-template-columns: 1fr;
+      }
+
+      .selected-result {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 0.25rem;
+      }
+    }
+  </style>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebApplication",
+        "@id": "https://getbpmfinder.com/bpm-to-milliseconds/#app",
+        "name": "BPM to Milliseconds Converter",
+        "url": "https://getbpmfinder.com/bpm-to-milliseconds/",
+        "applicationCategory": "UtilitiesApplication",
+        "operatingSystem": "Any",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "USD"
+        },
+        "description": "Convert BPM into millisecond values for quarter, eighth, sixteenth, thirty-second, dotted, and triplet notes in your browser."
+      },
+      {
+        "@type": "FAQPage",
+        "@id": "https://getbpmfinder.com/bpm-to-milliseconds/#faq",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "Is a quarter note the same as one beat?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "In 4/4 time, the quarter note normally receives one beat, so a quarter note and one beat have the same duration. Other time signatures can assign the beat to a different note value, so check the meter and the DAW grid before treating them as identical."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Why does my DAW show a different time from this calculation?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "A DAW or plug-in may display a rounded value, samples instead of milliseconds, or the final timing after latency compensation. Sample-rate conversion and plug-in delay compensation can change how a time is represented or when audio is heard, even though the BPM-to-millisecond value itself follows the same formula."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "How are triplet note times calculated?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "A quarter-note triplet fits three equal notes into the time normally occupied by two quarter notes, so multiply the beat duration by 2/3. An eighth-note triplet is half that duration, which is the beat duration multiplied by 1/3."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Does changing the sample rate affect BPM-to-millisecond conversion?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "No. The conversion depends only on BPM and note value. Changing the sample rate changes how many digital samples occur during that millisecond duration, but it does not change the duration in milliseconds."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "How is a dotted note calculated?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "A dot adds half of the original note value. A dotted quarter note is one quarter note plus one eighth note, so it lasts 1.5 beats. A dotted eighth note lasts 0.75 of a beat."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Can I use these values for compressor attack and release?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes, these values provide tempo-related starting points for attack and release controls measured in milliseconds. The musical result still depends on the source, compressor design, threshold, and ratio, so adjust by ear after entering a calculated value."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "What if the song changes tempo?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Use the BPM of the section where the effect or edit occurs. A single conversion cannot represent multiple tempos at once. For tempo maps, automate the plug-in time or use note-synced mode so the DAW follows each tempo change."
+            }
+          }
+        ]
+      },
+      {
+        "@type": "BreadcrumbList",
+        "@id": "https://getbpmfinder.com/bpm-to-milliseconds/#breadcrumb",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Home",
+            "item": "https://getbpmfinder.com/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "BPM to Milliseconds",
+            "item": "https://getbpmfinder.com/bpm-to-milliseconds/"
+          }
+        ]
+      }
+    ]
+  }
+  </script>
+</head>
+<body>
+
+<header class="site-header">
+  <a href="/" class="site-logo">BPM Finder</a>
+  <nav class="site-nav" aria-label="Primary navigation">
+    <a href="/">BPM Finder</a>
+    <a href="/tap-tempo/">Tap Tempo</a>
+    <a href="/bpm-counter/">BPM Counter</a>
+  </nav>
+</header>
+
+<main>
+  <h1>BPM to Milliseconds Converter</h1>
+
+  <section class="converter-panel" aria-label="BPM to milliseconds calculator">
+    <div class="converter-controls">
+      <div class="converter-field">
+        <label for="bpmInput">Tempo in BPM</label>
+        <input class="converter-input" id="bpmInput" name="bpm" type="number" min="20" max="300" step="0.01" value="120" inputmode="decimal" aria-describedby="bpmMessage">
+      </div>
+      <div class="converter-field">
+        <label for="noteSelect">Note value</label>
+        <select class="converter-select" id="noteSelect" name="note">
+          <option value="quarter" selected>1/4 note</option>
+          <option value="eighth">1/8 note</option>
+          <option value="sixteenth">1/16 note</option>
+          <option value="thirtySecond">1/32 note</option>
+          <option value="dottedQuarter">Dotted 1/4</option>
+          <option value="dottedEighth">Dotted 1/8</option>
+          <option value="quarterTriplet">Triplet 1/4</option>
+          <option value="eighthTriplet">Triplet 1/8</option>
+        </select>
+      </div>
+    </div>
+
+    <p class="input-message" id="bpmMessage" role="alert" aria-live="polite"></p>
+
+    <div id="resultsCard" aria-live="polite">
+      <div class="selected-result">
+        <span id="selectedLabel">Selected: 1/4 note</span>
+        <strong id="selectedValue">500.00 ms</strong>
+      </div>
+      <ul class="note-results" aria-label="All note values">
+        <li class="note-result is-selected" data-note="quarter"><span>1/4 note</span><output id="quarterResult">500.00 ms</output></li>
+        <li class="note-result" data-note="eighth"><span>1/8 note</span><output id="eighthResult">250.00 ms</output></li>
+        <li class="note-result" data-note="sixteenth"><span>1/16 note</span><output id="sixteenthResult">125.00 ms</output></li>
+        <li class="note-result" data-note="thirtySecond"><span>1/32 note</span><output id="thirtySecondResult">62.50 ms</output></li>
+        <li class="note-result" data-note="dottedQuarter"><span>Dotted 1/4</span><output id="dottedQuarterResult">750.00 ms</output></li>
+        <li class="note-result" data-note="dottedEighth"><span>Dotted 1/8</span><output id="dottedEighthResult">375.00 ms</output></li>
+        <li class="note-result" data-note="quarterTriplet"><span>Triplet 1/4</span><output id="quarterTripletResult">333.33 ms</output></li>
+        <li class="note-result" data-note="eighthTriplet"><span>Triplet 1/8</span><output id="eighthTripletResult">166.67 ms</output></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="info-section">
+    <h2>BPM to ms conversion chart</h2>
+    <p>Use this chart when you need a quick fixed reference without changing the calculator. Each cell shows the exact note duration rounded to two decimal places.</p>
+    <div class="chart-wrap" tabindex="0" aria-label="Scrollable BPM conversion chart">
+      <table class="bpm-table conversion-table">
+        <caption>Note duration in milliseconds (ms)</caption>
+        <thead>
+          <tr>
+            <th scope="col">BPM</th>
+            <th scope="col">1/4</th>
+            <th scope="col">1/8</th>
+            <th scope="col">1/16</th>
+            <th scope="col">1/32</th>
+            <th scope="col">Dotted 1/4</th>
+            <th scope="col">Dotted 1/8</th>
+            <th scope="col">Triplet 1/4</th>
+            <th scope="col">Triplet 1/8</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><th scope="row">60</th><td>1000.00 ms</td><td>500.00 ms</td><td>250.00 ms</td><td>125.00 ms</td><td>1500.00 ms</td><td>750.00 ms</td><td>666.67 ms</td><td>333.33 ms</td></tr>
+          <tr><th scope="row">70</th><td>857.14 ms</td><td>428.57 ms</td><td>214.29 ms</td><td>107.14 ms</td><td>1285.71 ms</td><td>642.86 ms</td><td>571.43 ms</td><td>285.71 ms</td></tr>
+          <tr><th scope="row">80</th><td>750.00 ms</td><td>375.00 ms</td><td>187.50 ms</td><td>93.75 ms</td><td>1125.00 ms</td><td>562.50 ms</td><td>500.00 ms</td><td>250.00 ms</td></tr>
+          <tr><th scope="row">90</th><td>666.67 ms</td><td>333.33 ms</td><td>166.67 ms</td><td>83.33 ms</td><td>1000.00 ms</td><td>500.00 ms</td><td>444.44 ms</td><td>222.22 ms</td></tr>
+          <tr><th scope="row">100</th><td>600.00 ms</td><td>300.00 ms</td><td>150.00 ms</td><td>75.00 ms</td><td>900.00 ms</td><td>450.00 ms</td><td>400.00 ms</td><td>200.00 ms</td></tr>
+          <tr><th scope="row">110</th><td>545.45 ms</td><td>272.73 ms</td><td>136.36 ms</td><td>68.18 ms</td><td>818.18 ms</td><td>409.09 ms</td><td>363.64 ms</td><td>181.82 ms</td></tr>
+          <tr><th scope="row">120</th><td>500.00 ms</td><td>250.00 ms</td><td>125.00 ms</td><td>62.50 ms</td><td>750.00 ms</td><td>375.00 ms</td><td>333.33 ms</td><td>166.67 ms</td></tr>
+          <tr><th scope="row">128</th><td>468.75 ms</td><td>234.38 ms</td><td>117.19 ms</td><td>58.59 ms</td><td>703.13 ms</td><td>351.56 ms</td><td>312.50 ms</td><td>156.25 ms</td></tr>
+          <tr><th scope="row">130</th><td>461.54 ms</td><td>230.77 ms</td><td>115.38 ms</td><td>57.69 ms</td><td>692.31 ms</td><td>346.15 ms</td><td>307.69 ms</td><td>153.85 ms</td></tr>
+          <tr><th scope="row">140</th><td>428.57 ms</td><td>214.29 ms</td><td>107.14 ms</td><td>53.57 ms</td><td>642.86 ms</td><td>321.43 ms</td><td>285.71 ms</td><td>142.86 ms</td></tr>
+          <tr><th scope="row">150</th><td>400.00 ms</td><td>200.00 ms</td><td>100.00 ms</td><td>50.00 ms</td><td>600.00 ms</td><td>300.00 ms</td><td>266.67 ms</td><td>133.33 ms</td></tr>
+          <tr><th scope="row">160</th><td>375.00 ms</td><td>187.50 ms</td><td>93.75 ms</td><td>46.88 ms</td><td>562.50 ms</td><td>281.25 ms</td><td>250.00 ms</td><td>125.00 ms</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="info-section">
+    <h2>How this is calculated</h2>
+    <p class="formula">msPerBeat = 60000 / BPM</p>
+    <p>There are 60,000 milliseconds in one minute. BPM tells you how many beats fit into that minute, so dividing 60,000 by the tempo gives the duration of one beat. At 120 BPM, the calculation is 60,000 ÷ 120 = 500 ms. In common 4/4 time, that beat is normally a quarter note. An eighth note takes half as long, a sixteenth takes one quarter as long, and a thirty-second note takes one eighth as long.</p>
+    <p>A dotted note includes the original note plus half of its value. That makes a dotted quarter 1.5 beats and a dotted eighth 0.75 beats, so the converter multiplies the beat duration by 1.5 or 0.75. Triplets divide a span into three equal parts instead of two. A quarter-note triplet fits three notes into two beats, making each note two-thirds of a beat. An eighth-note triplet is one-third of a beat.</p>
+    <p>The calculator always starts with the unrounded beat duration, applies the selected multiplier, and rounds only the displayed result to two decimal places. This avoids compounding a rounding difference at tempos that produce repeating decimals.</p>
+  </section>
+
+  <section class="info-section use-case">
+    <h2>What producers use this for</h2>
+
+    <h3>Tempo-synced delay times</h3>
+    <p>Delay plug-ins often offer note-sync controls, but hardware units and some detailed plug-in modes expect milliseconds. Converting the project BPM lets you set repeats that land on the rhythmic grid instead of drifting between beats. At 120 BPM, one beat is 500 ms, so a dotted eighth-note delay is 500 × 0.75 = 375 ms. That setting creates the familiar syncopated repeat pattern heard in rhythmic guitar, synth, and vocal effects.</p>
+
+    <h3>Aligning samples and drums</h3>
+    <p>A one-shot, percussion tail, or chopped loop can feel late when its useful length crosses the next grid line. Note durations give you precise edit targets. At 120 BPM, a sixteenth note is 125 ms, so you can trim a short hi-hat, move a transient, or set a sampler envelope around that interval. The value also helps when checking whether a delay printed into a sample will reinforce the groove or overlap the following drum hit.</p>
+
+    <h3>Compressor attack and release</h3>
+    <p>Attack and release controls shape how a compressor follows musical movement. A tempo-related release can return the gain reduction toward zero in time for the next beat or subdivision. Start with a quarter, eighth, or sixteenth-note value, then shorten or lengthen it while listening for pumping and lost transients. For attack, smaller subdivisions provide practical reference points, but the best setting still depends on the source envelope, threshold, ratio, and the compressor's response curve.</p>
+  </section>
+
+  <section class="info-section faq-section">
+    <h2>Frequently asked questions</h2>
+
+    <details>
+      <summary>Is a 1/4 note the same as one beat?</summary>
+      <div class="faq-answer">In 4/4 time, the quarter note normally receives one beat, so a quarter note and one beat have the same duration. Other time signatures can assign the beat to a different note value, so check the meter and the DAW grid before treating them as identical.</div>
+    </details>
+
+    <details>
+      <summary>Why does my DAW show a different time from this calculation?</summary>
+      <div class="faq-answer">A DAW or plug-in may display a rounded value, samples instead of milliseconds, or the final timing after latency compensation. Sample-rate conversion and plug-in delay compensation can change how a time is represented or when audio is heard, even though the BPM-to-millisecond value itself follows the same formula.</div>
+    </details>
+
+    <details>
+      <summary>How are triplet note times calculated?</summary>
+      <div class="faq-answer">A quarter-note triplet fits three equal notes into the time normally occupied by two quarter notes, so multiply the beat duration by 2/3. An eighth-note triplet is half that duration, which is the beat duration multiplied by 1/3.</div>
+    </details>
+
+    <details>
+      <summary>Does changing the sample rate affect BPM-to-millisecond conversion?</summary>
+      <div class="faq-answer">No. The conversion depends only on BPM and note value. Changing the sample rate changes how many digital samples occur during that millisecond duration, but it does not change the duration in milliseconds.</div>
+    </details>
+
+    <details>
+      <summary>How is a dotted note calculated?</summary>
+      <div class="faq-answer">A dot adds half of the original note value. A dotted quarter note is one quarter note plus one eighth note, so it lasts 1.5 beats. A dotted eighth note lasts 0.75 of a beat.</div>
+    </details>
+
+    <details>
+      <summary>Can I use these values for compressor attack and release?</summary>
+      <div class="faq-answer">Yes, these values provide tempo-related starting points for attack and release controls measured in milliseconds. The musical result still depends on the source, compressor design, threshold, and ratio, so adjust by ear after entering a calculated value.</div>
+    </details>
+
+    <details>
+      <summary>What if the song changes tempo?</summary>
+      <div class="faq-answer">Use the BPM of the section where the effect or edit occurs. A single conversion cannot represent multiple tempos at once. For tempo maps, automate the plug-in time or use note-synced mode so the DAW follows each tempo change.</div>
+    </details>
+  </section>
+
+  <section class="info-section">
+    <h2>Related tools</h2>
+    <ul class="related-list">
+      <li><a href="/">BPM Finder</a> — detect the BPM and musical key of an audio file in your browser.</li>
+      <li><a href="/tap-tempo/">Tap Tempo</a> — find a tempo by tapping along with the beat.</li>
+      <li><a href="/bpm-counter/">BPM Counter</a> — count beats over a fixed time window.</li>
+      <li><a href="/song-key-finder/">Song Key Finder</a> — estimate a track's key and Camelot code.</li>
+      <li><a href="/bpm-to-hertz/">BPM to Hertz</a> — convert tempo into cycles per second.</li>
+    </ul>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-col">
+      <h3>About</h3>
+      <ul>
+        <li><a href="/about/">About</a></li>
+        <li><a href="/contact/">Contact</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h3>Legal</h3>
+      <ul>
+        <li><a href="/privacy/">Privacy</a></li>
+        <li><a href="/terms/">Terms</a></li>
+      </ul>
+    </div>
+  </div>
+  <p class="footer-copy">&copy; 2026 BPM Finder. All processing runs in your browser — audio files never leave your device.</p>
+</footer>
+
+<script>
+const bpmInput = document.getElementById('bpmInput');
+const noteSelect = document.getElementById('noteSelect');
+const bpmMessage = document.getElementById('bpmMessage');
+const resultsCard = document.getElementById('resultsCard');
+const selectedLabel = document.getElementById('selectedLabel');
+const selectedValue = document.getElementById('selectedValue');
+
+const noteValues = {
+  quarter: { label: '1/4 note', multiplier: 1 },
+  eighth: { label: '1/8 note', multiplier: 0.5 },
+  sixteenth: { label: '1/16 note', multiplier: 0.25 },
+  thirtySecond: { label: '1/32 note', multiplier: 0.125 },
+  dottedQuarter: { label: 'Dotted 1/4', multiplier: 1.5 },
+  dottedEighth: { label: 'Dotted 1/8', multiplier: 0.75 },
+  quarterTriplet: { label: 'Triplet 1/4', multiplier: 2 / 3 },
+  eighthTriplet: { label: 'Triplet 1/8', multiplier: 1 / 3 }
+};
+
+function showInvalidInput() {
+  bpmMessage.textContent = 'Enter a valid BPM from 20 to 300.';
+  resultsCard.classList.add('results-invalid');
+  selectedValue.textContent = '—';
+
+  Object.keys(noteValues).forEach((key) => {
+    document.getElementById(key + 'Result').textContent = '—';
+  });
+}
+
+function updateConverter() {
+  const rawValue = bpmInput.value.trim();
+  const bpm = Number(rawValue);
+
+  if (rawValue === '' || !Number.isFinite(bpm) || bpm < 20 || bpm > 300) {
+    showInvalidInput();
+    return;
+  }
+
+  bpmMessage.textContent = '';
+  resultsCard.classList.remove('results-invalid');
+  const msPerBeat = 60000 / bpm;
+
+  Object.entries(noteValues).forEach(([key, note]) => {
+    const value = msPerBeat * note.multiplier;
+    document.getElementById(key + 'Result').textContent = value.toFixed(2) + ' ms';
+  });
+
+  const selectedKey = noteSelect.value;
+  const selectedNote = noteValues[selectedKey];
+  selectedLabel.textContent = 'Selected: ' + selectedNote.label;
+  selectedValue.textContent = (msPerBeat * selectedNote.multiplier).toFixed(2) + ' ms';
+
+  document.querySelectorAll('.note-result').forEach((row) => {
+    row.classList.toggle('is-selected', row.dataset.note === selectedKey);
+  });
+}
+
+bpmInput.addEventListener('input', updateConverter);
+noteSelect.addEventListener('change', updateConverter);
+updateConverter();
+</script>
+</body>
+</html>
