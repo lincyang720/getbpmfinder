@@ -1,0 +1,296 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BPM to Hz (Hertz) Converter and LFO Rate Chart | BPM Finder</title>
+<meta name="description" content="Convert BPM to hertz or Hz to BPM instantly in your browser. This free calculator works locally and includes a tempo chart and note-synced LFO rates.">
+<link rel="canonical" href="https://getbpmfinder.com/bpm-to-hertz/">
+<script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebApplication",
+      "name": "BPM to Hertz Converter",
+      "url": "https://getbpmfinder.com/bpm-to-hertz/",
+      "applicationCategory": "MultimediaApplication",
+      "operatingSystem": "Any",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      }
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "How many Hz is 1 BPM?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "One beat per minute is one cycle every 60 seconds. Its frequency is 1/60 Hz, approximately 0.01667 Hz. Keep the fraction when you need an exact value."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Can I use a Hz reading directly as BPM?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Multiply the reading by 60 if each cycle represents one beat. For example, a light flashing twice a second marks 120 beats per minute if you count every flash."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Why do synthesizer LFOs use Hz?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "An LFO can run at a fixed speed even when no song clock is available. A rate in Hz tells you how often its waveform repeats. Tempo sync instead lets you select a musical division that follows project tempo changes."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Do heart or breathing rates correspond to song BPM?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "You can express any of these counts per minute or per second. Matching the numbers only compares timing. A song tempo alone tells you nothing about an individual listener’s heart or breathing rate."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Does audio sample rate affect the conversion?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "No. Sample rate counts digital measurements of audio per second. Changing a recording session from 44.1 kHz to 48 kHz leaves the calculation for a given song tempo unchanged."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How do I keep an eighth-note filter sweep in time?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "At 120 BPM, a beat lasts half a second. An eighth note lasts a quarter of a second, so set the LFO to 4 Hz. To align the start of each sweep with the grid, also check the synth’s phase or retrigger setting."
+          }
+        }
+      ]
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Home",
+          "item": "https://getbpmfinder.com/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "BPM to Hertz",
+          "item": "https://getbpmfinder.com/bpm-to-hertz/"
+        }
+      ]
+    }
+  ]
+}</script>
+<style>
+:root {
+  --bg: #14161a;
+  --card: #1c2027;
+  --card-hover: #23272f;
+  --text: #e8eaed;
+  --text-muted: #8b929c;
+  --accent: #ff5c2b;
+  --accent2: #22d3a6;
+  --radius: 6px;
+  --font-heading: 'Space Grotesk', sans-serif;
+  --font-body: 'Inter', sans-serif;
+  --transition: 0.2s ease;
+}
+.site-header {
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.site-logo {
+  font-family: var(--font-heading);
+  font-size: 0.875rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  text-decoration: none;
+  transition: color var(--transition);
+}
+.site-logo:hover {
+  color: var(--text);
+}
+.site-footer {
+  border-top: 1px solid rgba(255,255,255,0.06);
+  padding: 2rem 1.5rem;
+}
+.footer-inner {
+  max-width: 720px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+.footer-col h3 {
+  font-family: var(--font-heading);
+  font-size: 0.6875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-muted);
+  margin-bottom: 0.5rem;
+}
+.footer-col ul {
+  list-style: none;
+}
+.footer-col li {
+  margin-bottom: 0.25rem;
+}
+.footer-col a {
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  text-decoration: none;
+  transition: color var(--transition);
+}
+.footer-col a:hover {
+  color: var(--text);
+}
+.footer-copy {
+  max-width: 720px;
+  margin: 1rem auto 0;
+  font-size: 0.6875rem;
+  color: var(--text-muted);
+  opacity: 0.6;
+}
+* { box-sizing:border-box; }
+body { margin:0; background:var(--bg); color:var(--text); font:1rem/1.6 system-ui,sans-serif; }
+.site-header, nav { display:flex; align-items:center; flex-wrap:wrap; gap:.5rem 1.25rem; }
+.site-header { justify-content:space-between; }
+nav a { color:var(--text); font-size:.9rem; }
+main { max-width:48rem; margin:auto; padding:1.5rem 1rem 4rem; }
+h1,h2 { line-height:1.15; letter-spacing:-.035em; }
+h1 { font-size:clamp(2rem,6vw,3rem); }
+h2 { margin:2.5rem 0 .75rem; }
+.card { background:var(--card); border-top:3px solid var(--accent); padding:1.25rem; border-radius:6px; }
+.fields { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
+label,small { display:block; }
+input { width:100%; margin:.35rem 0; padding:.5rem; background:var(--bg); color:var(--text); border:1px solid #717882; border-radius:4px; font:600 1.6rem system-ui; }
+small { color:#b4bac3; }
+#status { margin:.75rem 0 0; }
+table { border-collapse:collapse; width:100%; font-variant-numeric:tabular-nums; }
+th,td { padding:.45rem; text-align:right; border-bottom:1px solid #393d45; }
+th:first-child { text-align:left; }
+thead { background:var(--card); }
+summary { cursor:pointer; font-weight:600; }
+details { border-bottom:1px solid #393d45; padding:.7rem 0; }
+.footer-col ul,.footer-col h3 { padding:0; margin-top:0; }
+@media(max-width:600px) { .footer-inner { grid-template-columns:1fr; } }
+</style>
+</head>
+<body>
+<header class="site-header">
+<a href="/" class="site-logo">BPM Finder</a>
+<nav aria-label="Main navigation"><a href="/">Home</a><a href="/tap-tempo/">Tap Tempo</a><a href="/bpm-counter/">BPM Counter</a><a href="/bpm-to-milliseconds/">BPM to Milliseconds</a></nav>
+</header>
+<main>
+<h1>BPM to Hertz Converter</h1>
+<div class="card">
+<div class="fields">
+<label>Tempo (BPM)<input id="bpm" type="number" step="any" min="20" max="300" value="120" aria-describedby="bpm-help status"><small id="bpm-help">Enter 20–300 BPM</small></label>
+<label>Frequency (Hz)<input id="hz" type="number" step="any" min="0.1" max="50" value="2" aria-describedby="hz-help status"><small id="hz-help">Enter 0.1–50 Hz</small></label>
+</div>
+<p id="status" role="status">120 BPM = 2 Hz</p>
+<small>Edit either number. Each cycle counts as one beat.</small>
+<noscript>Enable JavaScript for live conversion, or use the charts below.</noscript>
+</div>
+<h2>How many Hz is 1 BPM</h2>
+<p>1 BPM = 0.01667 Hz (rounded). In the other direction, 1 Hz = 60 BPM, and 60 BPM = 1 Hz. Divide BPM by 60 to get Hz. Multiply Hz by 60 to get BPM.</p>
+<p>60 BPM = 1 Hz · 90 BPM = 1.5 Hz · 120 BPM = 2 Hz · 140 BPM ≈ 2.33 Hz · 180 BPM = 3 Hz</p>
+<h2>BPM to Hz conversion chart</h2>
+<p>Read across a row to find the frequency of a pulse on every beat. Values are rounded to three decimal places where needed.</p>
+<table><thead><tr><th scope="col">Tempo (BPM)</th><th scope="col">Beat frequency (Hz)</th></tr></thead><tbody>
+<tr><th scope="row">60</th><td>1</td></tr>
+<tr><th scope="row">70</th><td>1.167</td></tr>
+<tr><th scope="row">80</th><td>1.333</td></tr>
+<tr><th scope="row">90</th><td>1.5</td></tr>
+<tr><th scope="row">100</th><td>1.667</td></tr>
+<tr><th scope="row">110</th><td>1.833</td></tr>
+<tr><th scope="row">120</th><td>2</td></tr>
+<tr><th scope="row">130</th><td>2.167</td></tr>
+<tr><th scope="row">140</th><td>2.333</td></tr>
+<tr><th scope="row">150</th><td>2.5</td></tr>
+<tr><th scope="row">160</th><td>2.667</td></tr>
+<tr><th scope="row">170</th><td>2.833</td></tr>
+<tr><th scope="row">180</th><td>3</td></tr>
+</tbody></table>
+<h2>Note values as LFO rates</h2>
+<p>Count a quarter note as one beat and allow one complete LFO cycle per note. Divide BPM by 60, then divide by the note length in beats. To sync an LFO to eighth notes at 120 BPM, set its rate to 4 Hz.</p>
+<table><thead><tr><th scope="col">Note value</th><th scope="col">90 BPM (Hz)</th><th scope="col">120 BPM (Hz)</th><th scope="col">140 BPM (Hz)</th></tr></thead><tbody>
+<tr><th scope="row">1/4</th><td>1.5</td><td>2</td><td>2.333</td></tr>
+<tr><th scope="row">1/8</th><td>3</td><td>4</td><td>4.667</td></tr>
+<tr><th scope="row">1/16</th><td>6</td><td>8</td><td>9.333</td></tr>
+<tr><th scope="row">Dotted 1/4</th><td>1</td><td>1.333</td><td>1.556</td></tr>
+<tr><th scope="row">1/4 triplet</th><td>2.25</td><td>3</td><td>3.5</td></tr>
+<tr><th scope="row">1/8 triplet</th><td>4.5</td><td>6</td><td>7</td></tr>
+</tbody></table>
+<p>A dot adds half the original duration, so a dotted quarter takes 1.5 beats. A quarter-note triplet fits three notes into two beats, giving each cycle just two-thirds of a beat. The dotted sweep takes longer and the triplet sweep repeats faster.</p>
+<h2>BPM vs Hz: what's the difference</h2>
+<p>A DAW uses beats per minute to place musical events on a grid. A synthesizer uses hertz to describe how many times an oscillator completes its waveform each second. Beat frequency is the reciprocal of the time between beats in seconds. At 120 BPM the gap is 0.5 seconds, so a pulse on every beat repeats twice a second.</p>
+<p>Tempo and oscillator frequency describe different events. To connect them, decide what one cycle should span. A filter can open and close four times during a single beat while the drummer keeps exactly the same tempo.</p>
+<h2>Frequently asked questions</h2>
+<details><summary>How many Hz is 1 BPM?</summary><p>One beat per minute is one cycle every 60 seconds. Its frequency is 1/60 Hz, approximately 0.01667 Hz. Keep the fraction when you need an exact value.</p></details>
+<details><summary>Can I use a Hz reading directly as BPM?</summary><p>Multiply the reading by 60 if each cycle represents one beat. For example, a light flashing twice a second marks 120 beats per minute if you count every flash.</p></details>
+<details><summary>Why do synthesizer LFOs use Hz?</summary><p>An LFO can run at a fixed speed even when no song clock is available. A rate in Hz tells you how often its waveform repeats. Tempo sync instead lets you select a musical division that follows project tempo changes.</p></details>
+<details><summary>Do heart or breathing rates correspond to song BPM?</summary><p>You can express any of these counts per minute or per second. Matching the numbers only compares timing. A song tempo alone tells you nothing about an individual listener’s heart or breathing rate.</p></details>
+<details><summary>Does audio sample rate affect the conversion?</summary><p>No. Sample rate counts digital measurements of audio per second. Changing a recording session from 44.1 kHz to 48 kHz leaves the calculation for a given song tempo unchanged.</p></details>
+<details><summary>How do I keep an eighth-note filter sweep in time?</summary><p>At 120 BPM, a beat lasts half a second. An eighth note lasts a quarter of a second, so set the LFO to 4 Hz. To align the start of each sweep with the grid, also check the synth’s phase or retrigger setting.</p></details>
+<h2>Related tools</h2>
+<nav aria-label="Related tools"><a href="/">BPM Finder</a><a href="/tap-tempo/">Tap Tempo</a><a href="/bpm-counter/">BPM Counter</a><a href="/song-key-finder/">Song Key Finder</a><a href="/bpm-to-milliseconds/">BPM to Milliseconds</a></nav>
+</main>
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-col">
+      <h3>About</h3>
+      <ul>
+        <li><a href="/about/">About</a></li>
+        <li><a href="/contact/">Contact</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h3>Legal</h3>
+      <ul>
+        <li><a href="/privacy/">Privacy</a></li>
+        <li><a href="/terms/">Terms</a></li>
+      </ul>
+    </div>
+  </div>
+  <p class="footer-copy">&copy; 2026 BPM Finder. All processing runs in your browser — audio files never leave your device.</p>
+</footer>
+<script>
+const bpm = document.getElementById('bpm');
+const hz = document.getElementById('hz');
+const statusLine = document.getElementById('status');
+const format = new Intl.NumberFormat('en-US', {maximumFractionDigits: 3, useGrouping: false});
+
+function convert(source, target, unit) {
+  const value = source.valueAsNumber;
+  const valid = Number.isFinite(value) && value >= Number(source.min) && value <= Number(source.max);
+  source.setAttribute('aria-invalid', String(!valid));
+  target.removeAttribute('aria-invalid');
+  if (!valid) {
+    target.value = '';
+    statusLine.textContent = 'Enter a number from ' + source.min + ' to ' + source.max + ' ' + unit + '.';
+    return;
+  }
+  const result = source === bpm ? value / 60 : value * 60;
+  target.value = format.format(result);
+  statusLine.textContent = bpm.value + ' BPM ' + (Number(target.value) === result ? '=' : '≈') + ' ' + hz.value + ' Hz';
+}
+bpm.addEventListener('input', () => convert(bpm, hz, 'BPM'));
+hz.addEventListener('input', () => convert(hz, bpm, 'Hz'));
+</script>
+</body>
+</html>
